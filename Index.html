@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hollowbrook, 1952</title>
+<meta name="description" content="A self-running 1950s town simulation with elections, parties, laws, businesses, jobs and transit.">
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600&family=Poiret+One&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#efe6d0;--ink:#1a2a2c;--mute:#5e6a66;--panel:#f8f1de;--line:#cdbf98;--gold:#a8791a;--teal:#12565c;--coral:#c4482f;--bar:#d4a63a;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1d20;--ink:#efe5c8;--mute:#9fb0a8;--panel:#14292d;--line:#2f4a4a;--gold:#e0b64a;--teal:#5cc1c4;--coral:#f08a6c}}
+:root[data-theme="dark"]{--bg:#0d1d20;--ink:#efe5c8;--mute:#9fb0a8;--panel:#14292d;--line:#2f4a4a;--gold:#e0b64a;--teal:#5cc1c4;--coral:#f08a6c}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Josefin Sans",system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:14px 14px 36px}
+header{text-align:center;padding:8px 0 12px;border-bottom:4px double var(--gold);margin-bottom:12px}
+h1{font:400 clamp(30px,7vw,54px)/1 "Poiret One",Georgia,serif;letter-spacing:.14em;margin:0}
+header p{margin:6px 0 0;color:var(--mute)}
+h2{font:400 24px "Poiret One",Georgia,serif;letter-spacing:.06em;margin:24px 0 8px;border-bottom:1px solid var(--line)}
+#cv{display:block;width:100%;margin:0 auto;border:3px double var(--gold);border-radius:4px;touch-action:none;background:#1c1f24}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+button,select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--gold);border-radius:4px;padding:5px 12px;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.status{color:var(--mute);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(min-width:760px){.stats{grid-template-columns:repeat(6,1fr)}}
+.stats div{background:var(--panel);border:1px solid var(--line);padding:6px 10px}
+.stats b{display:block;font:600 17px "Josefin Sans",sans-serif;font-variant-numeric:tabular-nums}
+.stats span{color:var(--mute);font-size:13px}
+.cols{display:grid;grid-template-columns:1fr;gap:0 28px}
+@media(min-width:760px){.cols{grid-template-columns:1fr 1fr}}
+.ov{display:flex;align-items:center;gap:12px;margin-bottom:8px}.ov b{font:400 54px/1 "Poiret One",serif;color:var(--gold)}
+.sr{display:grid;grid-template-columns:22px 78px 1fr 34px 26px 16px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)}
+.sr i{font-style:normal;color:var(--gold);font-weight:600}.sr em{font-style:normal;font-weight:600}.sr s{text-decoration:none;color:var(--mute)}
+.track{height:10px;background:var(--line);border-radius:5px;overflow:hidden}.track u{display:block;height:100%;background:var(--bar)}
+.sub{color:var(--mute);font-size:13px;margin:0 0 6px}
+#insp{background:var(--panel);border:1px solid var(--line);padding:10px 12px;font-size:14px}
+#insp ul{margin:6px 0 0;padding-left:18px;color:var(--mute)}
+#insp .tag{display:inline-block;border:1px solid var(--line);border-radius:10px;padding:0 8px;margin:2px 4px 2px 0;font-size:13px}
+#pulse{display:block;width:100%;height:auto;background:var(--panel);border:1px solid var(--line)}
+.laws label{display:grid;grid-template-columns:1fr auto;gap:0 10px;margin:6px 0;font-size:14px}
+.laws input[type=range]{grid-column:1/3;width:100%;accent-color:var(--gold)}
+.st{display:flex;gap:8px;align-items:center;padding:3px 0;font-size:14px}
+details{margin-top:10px}summary{cursor:pointer;color:var(--gold);font-weight:600}
+ul.f{list-style:none;margin:0;padding:0;font-size:14px}
+ul.f li{padding:6px 0;border-bottom:1px solid var(--line)}
+ul.f li.hd{color:var(--gold);font-weight:600;border-bottom:none;padding-top:14px}
+li.crime{color:var(--coral)}li.gov{color:var(--teal)}li.econ{color:var(--gold)}li.old{color:var(--mute)}
+.scroll{max-height:340px;overflow-y:auto;overscroll-behavior:contain;padding-right:8px;scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
+.scroll.tall{max-height:480px}.scroll.short{max-height:230px}
+.scroll::-webkit-scrollbar{width:8px}.scroll::-webkit-scrollbar-thumb{background:var(--gold);border-radius:4px}
+.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px;margin:8px 0}
+.seat{border:1px solid var(--line);border-top:4px solid var(--pc);background:var(--panel);padding:4px 7px;font-size:12px;line-height:1.3}
+.seat b{display:block;font-size:13px}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:28px;padding-top:12px;border-top:4px double var(--gold)}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>HOLLOWBROOK</h1>
+  <p>The 1952 town that runs itself. Watch its citizens work, shop, fall in and out with their parties, and fight over the laws.</p>
+</header>
+
+<canvas id="cv" aria-label="Top-down map of the town. Citizens in 1950s dress walk the sidewalks and gather at homes, shops and workplaces; cars, buses and bicycles move along the streets."></canvas>
+
+<div class="bar">
+  <button id="pp">Pause</button>
+  <select id="sp" aria-label="Speed"><option value=".3">Slow</option><option value=".8" selected>Normal</option><option value="3">Fast</option></select>
+  <button id="ov">Overview</button>
+  <button id="sv">Save game</button>
+  <button id="ld" disabled>Load save</button>
+  <button id="mu" aria-pressed="false">♪ Play jazz</button>
+  <button id="rs">New town</button>
+  <span class="status" id="mst" role="status"></span>
+</div>
+<p class="sub">Scroll to zoom, drag to pan, click anyone on the map to follow them. The town saves itself to this browser every in-game day.</p>
+
+<div class="stats">
+  <div><b id="s_t"></b><span>Time</span></div>
+  <div><b id="s_p"></b><span>Citizens</span></div>
+  <div><b id="s_r"></b><span>Treasury</span></div>
+  <div><b id="s_e"></b><span>Employed</span></div>
+  <div><b id="s_j"></b><span>In jail</span></div>
+  <div><b id="s_m"></b><span>Moving: walk / bike / bus / car</span></div>
+</div>
+
+<div class="cols">
+  <section><h2>Town scorecard</h2><p class="sub">Five areas of town life, scored 0 to 100 and ranked. Arrows compare with 10 days ago.</p><div id="score"></div></section>
+  <section><h2>Town pulse</h2><p class="sub">How citizens are faring, day by day over the last 60 days.</p><canvas id="pulse" width="680" height="320" aria-label="Charts of average happiness, median wealth, average health and trust in the governing parties"></canvas></section>
+</div>
+
+<div class="cols">
+  <section><h2>Citizen in focus</h2><div id="insp"></div></section>
+  <section><h2>Town council</h2><p class="sub" id="cstat"></p><div class="seats" id="seats"></div><ul class="f scroll short" id="parties"></ul></section>
+</div>
+
+<div class="cols">
+  <section><h2>The statute book</h2><p class="sub">Laws in force, then every change the council has made. The council writes, amends and strikes laws; a petition backed by 80% of citizens forces a vote.</p><ul class="f scroll" id="book"></ul></section>
+  <section><h2>Citizen petitions</h2><p class="sub">Any citizen can start a petition at Town Hall. It reaches the council floor only if 80% of citizens back it.</p><ul class="f scroll" id="docket"></ul></section>
+</div>
+
+<div class="cols">
+  <section><h2>The Hollowbrook Gazette</h2><ul class="f scroll tall" id="log"></ul></section>
+  <section><h2>Budget and services</h2><p id="ledger"></p><p class="sub">Your starting budget. The council amends it, weighing its members’ wallets against the town’s books. Funding sets how well each service works; an empty treasury stops buses, police, relief and subsidies.</p><div class="laws" id="laws"></div>
+    <details><summary>Starting laws for a new town</summary><div id="starters"></div></details></section>
+</div>
+
+<footer>Hollowbrook, 1952. Every citizen, business, party and law is simulated live in your browser.</footer>
+</main>
+<script>
+'use strict';
+/* =============================================================================
+   HOLLOWBROOK, 1952: a self-running town simulation
+   1 core: utilities, map, data tables, state, citizens
+   2 sim: daily life, money, substances, movement, the day cycle
+   3 government: law evaluation, petitions, council, parties, scoring
+   4 view: town art, people, rendering, interface, saving, music
+   ============================================================================= */
+
+// ---------------------------------------------------------------- utilities
+const $ = id => document.getElementById(id);
+const rnd = (a, b) => a + Math.random() * (b - a);
+const cl = (v, a, b) => Math.max(a, Math.min(b, v));
+const gs = () => (Math.random() + Math.random() + Math.random() - 1.5) * 1.15;   // rough bell curve
+const pick = a => a[Math.random() * a.length | 0];
+const pct = v => Math.round(v * 100) + '%';
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const wpick = items => {                                                     // weighted pick of [value, weight]
+  const t = items.reduce((s, x) => s + Math.max(0, x[1]), 0);
+  let r = Math.random() * t;
+  for (const x of items) { r -= Math.max(0, x[1]); if (r <= 0) return x[0]; }
+  return items[0][0];
+};
+
+// ---------------------------------------------------------------- the map
+const NX = 6, NY = 6;
+const X = i => 20 + i * 190, Y = j => 20 + j * 190;                          // street centre lines
+const W = X(NX) + 20, H = Y(NY) + 20;
+const TY = [
+  ['home:bungalow', 'home:victorian', 'office', 'works', 'hall', 'home:apartment'],
+  ['home:ranch', 'diner', 'park:fountain', 'grocery', 'court', 'cinema'],
+  ['home:victorian', 'dept', 'gas', 'police', 'jail', 'home:bungalow'],
+  ['home:apartment', 'barber', 'depot', 'works', 'park:ball', 'home:ranch'],
+  ['home:ranch', 'drugstore', 'office', 'bakery', 'cannery', 'home:bungalow'],
+  ['home:victorian', 'bar', 'drivein', 'mill', 'club', 'home:apartment'],
+];
+const blocks = [];
+TY.forEach((row, j) => row.forEach((s, i) => {
+  const [t, sty] = s.split(':');
+  blocks.push({ t, sty, i, j, x0: X(i) + 20, y0: Y(j) + 20, id: blocks.length });
+}));
+const bt = t => blocks.filter(b => b.t === t);
+const hallB = () => bt('hall')[0];
+
+// ---------------------------------------------------------------- data tables
+const MODES = ['walk', 'bike', 'bus', 'car'];
+const VERB = { walk: 'walking', bike: 'cycling', bus: 'taking the bus', car: 'driving' };
+
+// Substances the council can tax, ban or legalise
+const SUBS = {
+  alcohol:  { n: 'Alcohol', price: 1.5, mood: 12, harm: .35, hook: .05, crave: .5 },
+  tobacco:  { n: 'Tobacco', price: .8, mood: 5, harm: .25, hook: .08, crave: .2 },
+  cannabis: { n: 'Cannabis', price: 1.5, mood: 10, harm: .08, hook: .03, crave: .15 },
+  sweets:   { n: 'Sweets and Soda Pop', price: .6, mood: 4, harm: .06, hook: .02, crave: 0 },
+  coffee:   { n: 'Coffee', price: .5, mood: 3, harm: .02, hook: .04, crave: 0 },
+};
+const SK = Object.keys(SUBS);
+
+// Places citizens visit; every one except the park is a privately owned business
+const VEN = {
+  diner:     { n: 'Diner', place: 'the Starlite Diner', price: 3, food: 60, mood: 6, soc: 1, open: [6, 23], dw: 1, sells: ['coffee', 'sweets'] },
+  grocery:   { n: 'Grocery', place: 'the Corner Grocery', price: 2, food: 70, mood: 2, open: [7, 21], dw: .7, sells: ['tobacco', 'sweets'] },
+  bakery:    { n: 'Bakery', place: 'Hartley’s Bakery', price: 1.2, food: 35, mood: 4, open: [6, 16], dw: .5, sells: ['coffee', 'sweets'] },
+  drugstore: { n: 'Drugstore', place: 'Main Street Drugs', price: 1.5, food: 20, mood: 6, soc: 1, open: [8, 21], dw: .8, sells: ['sweets', 'tobacco', 'cannabis'] },
+  cinema:    { n: 'Cinema', place: 'the Bijou', price: 2.5, mood: 20, soc: 1, open: [12, 24], dw: 2.5, sells: ['sweets'] },
+  drivein:   { n: 'Drive-In', place: 'the Starlight Drive-In', price: 2, mood: 18, soc: 1, open: [19, 24], dw: 2.5, sells: ['sweets'] },
+  bar:       { n: 'Bar', place: 'the Rusty Anchor', price: 2, mood: 10, soc: 1, open: [15, 24], dw: 2, sells: ['alcohol', 'tobacco'] },
+  club:      { n: 'Supper Club', place: 'Club Fifty-Two', price: 4, mood: 18, soc: 1, open: [19, 24], dw: 2.5, sells: ['alcohol', 'tobacco'] },
+  barber:    { n: 'Barbershop', place: 'the barbershop', price: 1.5, mood: 8, open: [8, 19], dw: 1, sells: [] },
+  dept:      { n: 'Department Store', place: 'Brightwell’s', price: 5, mood: 12, open: [9, 20], dw: 1.5, sells: [] },
+  gas:       { n: 'Gas Station', place: 'the gas station', price: 4, mood: 0, open: [6, 22], dw: .3, sells: ['tobacco'] },
+  park:      { n: 'Park', place: 'the park', price: 0, mood: 18, soc: 1, open: [6, 22], dw: 2, sells: [], pub: 1 },
+};
+const VK = Object.keys(VEN);
+
+const JOBS = {
+  works:   { n: 'machinist', m: 1, slots: 14, place: 'the works' },
+  mill:    { n: 'millhand', m: 1.05, slots: 14, place: 'the lumber mill' },
+  cannery: { n: 'cannery worker', m: .95, slots: 16, place: 'the cannery' },
+  office:  { n: 'insurance clerk', m: 1.25, slots: 12, sk: .45, place: 'Mutual Insurance' },
+  depot:   { n: 'bus driver', m: 1.05, gov: 1, place: 'the bus depot' },
+  police:  { n: 'patrolman', m: 1.1, gov: 1, place: 'the police station' },
+  diner:   { n: 'short-order cook', m: .8, slots: 6 }, grocery: { n: 'grocer', m: .8, slots: 5 },
+  bakery:  { n: 'baker', m: .85, slots: 4 }, drugstore: { n: 'pharmacist', m: 1.3, slots: 3, sk: .5 },
+  cinema:  { n: 'usher', m: .7, slots: 4 }, drivein: { n: 'projectionist', m: .75, slots: 3 },
+  bar:     { n: 'bartender', m: .8, slots: 4 }, club: { n: 'club waiter', m: .85, slots: 5 },
+  barber:  { n: 'barber', m: .9, slots: 3 }, dept: { n: 'salesclerk', m: .85, slots: 6 },
+  gas:     { n: 'pump attendant', m: .8, slots: 3 },
+};
+for (const k in JOBS) if (VEN[k]) JOBS[k].place = VEN[k].place;
+const JK = Object.keys(JOBS);
+const jobBlocks = () => blocks.filter(b => JOBS[b.t]);
+
+const RENT = { apartment: 1.2, bungalow: 2, victorian: 2.6, ranch: 3.2 };
+const HOMEJOY = { apartment: 0, bungalow: 2, victorian: 3, ranch: 5 };
+const HOMECAP = { apartment: 40, bungalow: 22, victorian: 20, ranch: 16 };
+
+const LBL = {
+  home: 'Heading home', work: 'To work', park: 'To the park', friend: 'Visiting a friend', hall: 'To Town Hall',
+  court: 'To court', jail: 'To jail', diner: 'To the diner', grocery: 'To the grocery', bakery: 'To the bakery',
+  drugstore: 'To the drugstore', cinema: 'To the pictures', drivein: 'To the drive-in', bar: 'To the bar',
+  club: 'To the supper club', barber: 'To the barber', dept: 'To Brightwell’s', gas: 'To the gas station',
+};
+
+// 1950s wardrobe
+const MN = ['Harold', 'Walter', 'Frank', 'Eugene', 'Stanley', 'Leonard', 'Raymond', 'Donald', 'Gerald', 'Norman', 'Chester', 'Vernon', 'Lloyd', 'Clarence', 'Earl', 'Howard'];
+const FN = ['Dorothy', 'Betty', 'Marjorie', 'Doris', 'Shirley', 'Barbara', 'Patricia', 'Loretta', 'Gladys', 'Phyllis', 'Edna', 'Joan', 'Peggy', 'Irene', 'Lorraine', 'Mildred'];
+const SN = ['Abbott', 'Becker', 'Callahan', 'Dunn', 'Ellison', 'Fairbanks', 'Graves', 'Hartley', 'Irving', 'Jensen', 'Kowalski', 'Lindqvist', 'Mercer', 'Novak', 'O’Hara', 'Pruitt', 'Russo', 'Sullivan', 'Thornton', 'Vance', 'Whitfield', 'Yates', 'Zimmerman', 'Delgado', 'Washington', 'Okafor', 'Nakamura', 'Brennan'];
+const SUIT = ['#4a4f58', '#6b5a45', '#2f3d55', '#56624f', '#7a6a55', '#3b3f4a'];
+const HAT = ['#2d2a28', '#4a3b2e', '#6b5a45', '#3a3f45', '#5b4a3a'];
+const DRESS = ['#e98fa8', '#7fc4bf', '#f2c14e', '#9ab3e6', '#e7e1c9', '#c4482f', '#b39ddb', '#f4a582'];
+const HAIR = ['#3b2a1e', '#c99a56', '#8a3b24', '#1f1a17', '#d8c08a', '#6b4a36'];
+const SKIN = ['#f1d0b0', '#e6bc94', '#c99470', '#9a6646', '#6a4128'];
+const KIDWEAR = ['#c4482f', '#2f5fa8', '#f2c14e', '#3f8a4a', '#e98fa8', '#7fc4bf'];
+
+// ---------------------------------------------------------------- budget and law grammar
+const P = { police: .5, pen: 6, tax: .2, transit: .4, bike: .3, road: .4 };
+const DEF = [['police', 'Police funding', 50, 0, 100], ['pen', 'Felony jail sentence', 6, 1, 20], ['tax', 'Income tax', 20, 0, 40],
+             ['transit', 'Public transit', 40, 0, 100], ['bike', 'Bike lanes', 30, 0, 100], ['road', 'Roads and parking', 40, 0, 100]];
+const LAWS = { police: { lo: 0, hi: 1, st: .1 }, pen: { lo: 1, hi: 20, st: 2 }, tax: { lo: 0, hi: .4, st: .05 },
+               transit: { lo: 0, hi: 1, st: .1 }, bike: { lo: 0, hi: 1, st: .1 }, road: { lo: 0, hi: 1, st: .1 } };
+const LN = Object.fromEntries(DEF.map(d => [d[0], d[1]]));
+const fmt = (k, v) => k === 'pen' ? v + ' days' : Math.round(v * 100) + '%';
+
+// What a citizen is likely to aim a law at: places they go, substances they feel strongly about
+const venueTarget = c => { const v = Object.keys(c.vis).sort((a, b) => c.vis[b] - c.vis[a])[0]; return Math.random() < .6 && v ? v : pick(VK); };
+const subTarget = c => Math.random() < .6 ? SK.slice().sort((a, b) => Math.abs(perm(c, b) - .5) - Math.abs(perm(c, a) - .5))[0] : pick(SK);
+const modeTarget = () => pick(['car', 'bus', 'bike']);
+
+// Citizens assemble bills from these building blocks
+const TPL = {
+  vtax:     { tg: venueTarget, vals: [.1, .2, .3], name: l => `${VEN[l.tgt].n} Tax of ${pct(l.val)}` },
+  vsub:     { tg: venueTarget, vals: [.2, .3, .5], name: l => `${VEN[l.tgt].n} Discount of ${pct(l.val)}` },
+  hours:    { tg: venueTarget, vals: [19, 20, 21], name: l => `${VEN[l.tgt].n} Closing Hour of ${l.val}:00` },
+  vfund:    { tg: venueTarget, vals: [1], name: l => `${VEN[l.tgt].n} Improvement Fund` },
+  mtax:     { tg: modeTarget, vals: [1, 2, 3], name: l => `${{ car: 'Motorist Toll', bus: 'Bus Surcharge', bike: 'Bicycle Levy' }[l.tgt]} of $${l.val}` },
+  msub:     { tg: modeTarget, vals: [.5, 1, 1.5], name: l => `${{ car: 'Gasoline Allowance', bus: 'Bus Fare Relief', bike: 'Bicycle Allowance' }[l.tgt]} of $${l.val}` },
+  quota:    { tg: () => pick(JK), vals: [2, 4], name: l => `${cap(JOBS[l.tgt].n)} Jobs Program (+${l.val})` },
+  minwage:  { vals: [1.1, 1.2, 1.3], name: l => `Minimum Wage Act (+${pct(l.val - 1)})` },
+  wtax:     { vals: [.01, .02, .03], name: l => `Wealth Levy of ${pct(l.val)} a day` },
+  dividend: { vals: [1, 2], name: l => `Citizen Dividend of $${l.val} a day` },
+  curfew:   { vals: [21, 22, 23], name: l => `Curfew from ${l.val}:00` },
+  jaywalk:  { vals: [2], name: () => 'Jaywalking Ordinance' },
+  baby:     { vals: [10, 20], name: l => `Baby Bonus of $${l.val}` },
+  rent:     { vals: [1], name: () => 'Rent Ceiling Act' },
+  welfare:  { vals: [1, 2, 3], name: l => `Poor Relief Act ($${l.val} a day)` },
+  ban:      { tg: subTarget, vals: [1], name: l => `${SUBS[l.tgt].n} Prohibition` },
+  stax:     { tg: subTarget, vals: [.5, 1, 2], name: l => `${SUBS[l.tgt].n} Tax of $${l.val}` },
+  theft:    { name: () => 'Theft Statute' },
+  jury:     { name: () => 'Trial by Jury Act' },
+  reckless: { name: () => 'Reckless Driving Ordinance' },
+};
+const TK = Object.keys(TPL), lname = l => TPL[l.type].name(l);
+const STARTERS = [
+  [{ type: 'theft' }, 1], [{ type: 'jury' }, 1], [{ type: 'reckless' }, 1], [{ type: 'welfare', val: 2 }, 1],
+  [{ type: 'vfund', tgt: 'park', val: 1 }, 1], [{ type: 'ban', tgt: 'cannabis', val: 1 }, 1],
+  [{ type: 'ban', tgt: 'alcohol', val: 1 }, 0], [{ type: 'stax', tgt: 'tobacco', val: 1 }, 0], [{ type: 'curfew', val: 22 }, 0],
+  [{ type: 'minwage', val: 1.2 }, 0], [{ type: 'msub', tgt: 'bus', val: 1.5 }, 0], [{ type: 'mtax', tgt: 'car', val: 3 }, 0], [{ type: 'rent', val: 1 }, 0],
+];
+
+// Short-lived whims and longer-held wants colour every citizen's choices and votes
+const WHIMS = {
+  milkshake: { n: 'craving a malted milkshake', g: 'drugstore', w: c => .5 + c.taste.sweets },
+  hat:       { n: 'eyeing a new hat at Brightwell’s', g: 'dept', w: c => c.vain + rich(c) },
+  picture:   { n: 'wants to see the new picture', g: 'cinema', w: c => .6 + c.soc * .5 },
+  dance:     { n: 'in the mood to dance', g: 'club', w: c => c.soc + rich(c) * .5 },
+  drink:     { n: 'could use a stiff drink', g: 'bar', w: c => c.taste.alcohol + c.r * .5 },
+  quiet:     { n: 'needs some peace and quiet', g: 'park', w: c => 1.2 - c.soc },
+  company:   { n: 'missing old friends', g: 'friend', w: c => c.soc },
+  pie:       { n: 'dreaming of cherry pie', g: 'diner', w: c => .4 + c.taste.sweets * .6 },
+  drive:     { n: 'wants to take the car out to the drive-in', g: 'drivein', w: c => c.car ? .6 : 0 },
+  raise:     { n: 'wants a raise', g: 'work', w: c => c.job ? 1 - rich(c) : .2 },
+  safety:    { n: 'worried about crime in town', w: c => .2 + cl(c.vic, 0, 3) / 2 },
+  traffic:   { n: 'fed up with traffic', w: c => .1 + shr(c, 'car') * cong * 2 },
+  thrifty:   { n: 'pinching pennies this week', w: c => .3 + c.thr },
+  splurge:   { n: 'feeling flush and wants a treat', w: c => rich(c) * 1.2 },
+  lucky:     { n: 'feeling lucky', w: c => c.r * .6 },
+  civic:     { n: 'fired up about town politics', g: 'hall', w: c => c.civ * .6 + c.anger },
+};
+const WANTS = {
+  car:       { n: 'save up for a car', w: c => c.car ? 0 : (1 - c.eco) * (.4 + c.vain) },
+  house:     { n: 'move into a nicer home', w: c => RENT[c.home.sty] < 3 ? c.vain * .8 : 0 },
+  promotion: { n: 'land a better-paying job', w: c => c.job ? c.dil * .6 : .3 },
+  family:    { n: 'start a family', w: c => c.age > 20 && c.age < 100 ? .35 : 0 },
+  office:    { n: 'win a seat on the council', w: c => c.civ * c.civ },
+  business:  { n: 'own a business', w: c => c.owns == null ? (c.vain + c.r) * .25 : 0 },
+  friends:   { n: 'make more friends', w: c => c.fr.length < 3 ? c.soc * .6 : 0 },
+};
+
+// ---------------------------------------------------------------- game state
+const G = { T: 7, day: 0, tre: 400, births: 0, deaths: 0, nid: 0, bid: 0, lid: 0, pid: 0, broke: false,
+            lastDelta: 0, treY: 400, sessDay: -1, elecDay: -1, speed: .8, paused: false, intro: 1 };
+let C = [], byId = new Map(), laws = [], docket = [], parties = [], council = [], coalition = [];
+let gaz = [], petHist = [], lawHist = [], biz = {}, pulse = [], hist = {}, SC = {};
+let cong = 0, sel = null, smoke = [], fxs = [];
+const usedNames = new Set();
+const M = { tripH: 1.2, cost: 1, crime: 0, turn: .4, act: 2, sales: 2, pay: 400, vis: {}, trips: { walk: 2, bike: 2, bus: 2, car: 2 }, subs: {}, tj: 0 };
+let today = { crimes: 0, sales: 0, pay: 0, vis: {}, trips: { walk: 0, bike: 0, bus: 0, car: 0 }, subs: {} };
+
+// ---------------------------------------------------------------- small helpers
+const hr = () => String(Math.floor(G.T % 24)).padStart(2, '0') + ':00';
+const nm = c => `${c.name} ${c.sur}`;
+const law = (type, tgt) => laws.find(l => l.type === type && (tgt == null || l.tgt === tgt));
+const gov = () => !G.broke;
+const legal = s => !law('ban', s);
+const rich = c => cl(c.w / 60, 0, 1);
+const shr = (c, m) => c.use[m] / (MODES.reduce((a, k) => a + c.use[k], 0) + .1);
+const fa = c => c.fr.filter(i => byId.has(i));
+const adults = () => C.filter(c => c.age >= 15);
+const inf = () => G.broke ? .35 : 1;                                         // upkeep stops when broke
+const perm = (c, s) => cl(.5 + c.hab[s] * .6 + c.taste[s] * .25 - c.hc * .3 - (c.h - .5) * .2, 0, 1);
+const owned = c => c.owns != null ? blocks[c.owns] : null;
+
+// ---------------------------------------------------------------- citizens
+function chooseWant(c) {
+  const k = wpick(Object.keys(WANTS).map(k => [k, WANTS[k].w(c) + .02]));
+  return { k, since: G.day, ref: k === 'promotion' && c.job ? wageAt(c, c.job) : k === 'friends' ? c.fr.length : k === 'house' ? c.home.id : 0 };
+}
+
+function makeCitizen(parent) {
+  const m = k => parent ? cl(parent[k] + gs() * .07, 0, 1) : Math.random();
+  const home = parent ? parent.home : pick(bt('home'));
+  const male = Math.random() < .5;
+  const c = {
+    id: ++G.nid, male, name: pick(male ? MN : FN), sur: parent ? parent.sur : pick(SN),
+    look: { suit: pick(SUIT), hat: pick(HAT), dress: pick(DRESS), hair: pick(HAIR), kid: pick(KIDWEAR),
+            skin: parent ? parent.look.skin : pick(SKIN), pillbox: Math.random() < .35 },
+    // personality: honesty, risk, stealth, skill, diligence, eco-mindedness, sociability, civic spirit,
+    // thrift, budget hawkishness, vanity (status-consciousness), health-consciousness
+    h: parent ? m('h') : rnd(.25, .95), r: m('r'), sn: m('sn'), sk: m('sk'), dil: m('dil'), eco: m('eco'), soc: m('soc'),
+    civ: m('civ'), thr: m('thr'), fis: m('fis'), vain: m('vain'), hc: m('hc'), rep: m('rep') * .6 + .2, loy: .6,
+    taste: Object.fromEntries(SK.map(s => [s, parent ? cl(parent.taste[s] + gs() * .1, 0, 1) : Math.random() ** 1.5])),
+    hab: Object.fromEntries(SK.map(s => [s, 0])), crv: Object.fromEntries(SK.map(s => [s, 0])),
+    w: parent ? 20 : rnd(15, 40), hp: 10, age: parent ? 0 : Math.floor(rnd(15, 90)), max: rnd(120, 180),
+    en: 90, hu: 30, mood: 70, groom: rnd(0, 60), fuel: 100, anger: 0,
+    home, blk: home, tgt: home, gx: home.i, gy: home.j, x: X(home.i), y: Y(home.j), hx: 1, hy: 0, path: [],
+    st: 'do', goal: 'home', dwell: rnd(0, 3), mode: 'walk', wait: 0, pred: null, t0: 0, plan: null, deal: null, legal: null, jail: 0,
+    bike: false, car: false, job: null, owns: null, fr: [], cool: -9, loan: 0, pass: 0, inc: 8, exp: 6, dIn: 0, dOut: 0,
+    q: { walk: 0, bike: 0, bus: 0, car: 0, steal: 0 }, use: { walk: 0, bike: 0, bus: 0, car: 0 }, vis: {}, vq: {},
+    vic: 0, jt: 0, hist: [], cod: '', px: 0, py: 0, dx: 0, dy: 0, stp: Math.random() * 9,
+    trust: {}, party: 0, seat: false, voted: -1, att: -1, cons: [], lean: Array(12).fill(0), whim: null, want: null,
+  };
+  if (parent) { MODES.forEach(k => c.q[k] = parent.q[k] * .5); c.lean = parent.lean.map(x => x * .6); }
+  C.push(c); byId.set(c.id, c);
+  c.want = chooseWant(c);
+  return c;
+}
+
+/* =============================================================================
+   2  SIMULATION
+   ============================================================================= */
+
+// ---------------------------------------------------------------- jobs and the economy
+function econ() { return cl(1.25 - C.length / 400 + .1 * cl(M.sales / 400, 0, 1), .5, 1.2); }
+function grow() { return cl(C.length / 100 * (.85 + .15 * cl(M.sales / 300, 0, 2)), .7, 2.5); }
+function wageAt(c, b) { return 16 * econ() * (.6 + .8 * c.sk) * JOBS[b.t].m * ((law('minwage') || {}).val || 1); }
+
+let staffMemo = { t: -1, m: new Map() };                                      // head-count per workplace, refreshed often
+function staffOf(b) {
+  const t = Math.floor(G.T * 2);
+  if (staffMemo.t !== t) { const m = new Map(); for (const c of C) if (c.job) m.set(c.job.id, (m.get(c.job.id) || 0) + 1); staffMemo = { t, m }; }
+  return staffMemo.m.get(b.id) || 0;
+}
+const staffAdd = (b, d) => { if (b) staffMemo.m.set(b.id, staffOf(b) + d); };
+
+function slotsOf(b) {
+  const J = JOBS[b.t];
+  if (J.gov && G.broke) return 0;                                           // no money, no public payroll
+  let s = b.t === 'depot' ? 3 + 12 * P.transit : b.t === 'police' ? 3 + 14 * P.police : J.slots * grow();
+  if (VEN[b.t] && biz[b.id]) s *= cl(.6 + biz[b.id].avg / (VEN[b.t].price * 25), .6, 1.8);   // busy shops hire more
+  const mw = law('minwage'), q = law('quota', b.t);
+  if (mw) s *= Math.pow(1 / mw.val, 1.5);
+  if (q) s += q.val;
+  return Math.max(0, Math.round(s));
+}
+function findJob(c) {
+  const open = jobBlocks().filter(b => (JOBS[b.t].sk || 0) <= c.sk && staffOf(b) < slotsOf(b) && b !== c.job);
+  return open.length ? open.map(b => [b, wageAt(c, b) * (1 + gs() * .15)]).sort((a, b) => b[1] - a[1])[0][0] : null;
+}
+function fill(t) {                                                         // share of a service's posts that are staffed
+  const bs = bt(t), sl = bs.reduce((s, b) => s + slotsOf(b), 0);
+  return sl ? Math.min(1, bs.reduce((s, b) => s + staffOf(b), 0) / sl) : 0;
+}
+// Service efficacy follows funding and staffing
+const policePower = () => G.broke ? 0 : P.police * (.35 + .65 * fill('police'));
+const busWait = () => G.broke || !fill('depot') ? Infinity : 1 / (.4 + 3 * P.transit * fill('depot'));
+
+function price(v) {
+  const t = law('vtax', v), d = law('vsub', v);
+  return VEN[v].price * (1 + (t ? t.val : 0)) * (1 - (d ? d.val : 0));
+}
+function isOpen(v) { const h = G.T % 24, o = VEN[v].open, l = law('hours', v); return h >= o[0] && h < Math.min(o[1], l ? l.val : 99); }
+
+// ---------------------------------------------------------------- the Gazette, diaries and map call-outs
+function glog(t, k) {
+  const e = [`Day ${G.day}, ${hr()}: ${t}`, k || ''];
+  gaz.unshift(e); if (gaz.length > 400) gaz.pop();
+  const ul = $('log'); if (!ul) return;
+  ul.insertAdjacentHTML('afterbegin', `<li class="${e[1]}">${e[0]}</li>`);
+  while (ul.children.length > 400) ul.lastElementChild.remove();
+}
+function note(c, t) { c.hist.unshift(`Day ${G.day} ${hr()}: ${t}`); if (c.hist.length > 10) c.hist.pop(); if (c === sel || Math.random() < .05) glog(`${nm(c)} ${t}`); }
+function pop(b, t, col, dy) { fxs.push({ x: b.x0 + 75, y: b.y0 + 50 + (dy || 0), t, col, a: 1 }); if (fxs.length > 40) fxs.shift(); }
+
+// ---------------------------------------------------------------- choices
+function crimeEval(c) {
+  const lucky = c.whim && c.whim.k === 'lucky' ? .2 : 0;
+  const craving = SK.reduce((s, k) => s + c.crv[k] * SUBS[k].crave, 0);
+  const need = c.hu > 70 || c.w < 4 || (craving > .35 && c.w < 10);
+  const g = rnd(3, 14) * (craving > .35 ? 1.2 : 1), p0 = det(c), p = p0 * (1 - .5 * (c.r + lucky));
+  const u = (1 - p) * g - p * P.pen * 6 - 6 * c.h * (need ? .5 : 1) + 1.5 * (c.r + lucky) + .8 * c.q.steal;
+  return u > 1 && (need || c.h < .3) ? { g, p0, p } : null;
+}
+function det(c) { return law('theft') ? cl(policePower() * (1 - .8 * c.sn) + .03, 0, .9) : 0; }
+
+function tripCost(m, base) { const t = law('mtax', m), s = gov() && law('msub', m); return Math.max(0, base + (t ? t.val : 0) - (s ? s.val : 0)); }
+function chooseMode(c, d) {
+  const vt = .8 + c.w / 60, i = inf(), well = c.w > 120, o = [{ m: 'walk', t: d / 15, c: 0, x: d * .05 + (well ? d * .03 * c.vain : 0) }];
+  if (c.bike) o.push({ m: 'bike', t: d / (18 + 22 * P.bike * i), c: tripCost('bike', 0), x: (1 - P.bike) * d * .1 - (well && d < 10 ? 1.2 : 0) });
+  const wt = busWait();
+  if (isFinite(wt)) o.push({ m: 'bus', t: d / 28 + wt, w: wt, c: c.pass > 0 ? 0 : tripCost('bus', 1.2 * (1 - .5 * P.transit)),
+                            x: c.vain * rich(c) * 4 + (well ? 3 + (c.w - 120) / 40 : 0) });   // the well-off avoid the bus
+  if (c.car && c.fuel > d * .8) o.push({ m: 'car', t: d / (60 * (1 + .4 * P.road * i) / (1 + cong * .5)), c: tripCost('car', .04 * d + 1), x: 0 });
+  for (const a of o) a.s = a.t * vt + a.c + a.x - (a.m === 'bike' || a.m === 'bus' ? c.eco * 1.2 : 0) - (c.q[a.m] || 0) * .5 + gs() * .2 + (a.c > c.w ? 99 : 0);
+  o.sort((a, b) => a.s - b.s);
+  const b = o[0];
+  if (o[1]) b.alt = `chosen over ${VERB[o[1].m]} at ${o[1].t.toFixed(1)}h`;
+  if (well && b.m !== 'bus' && o.some(a => a.m === 'bus')) b.alt = (b.alt ? b.alt + '; ' : '') + 'too well-off to be seen on a bus';
+  return b;
+}
+
+function buy(c) {
+  const surplus = c.inc - c.exp, wantCar = c.want && c.want.k === 'car';
+  if (!c.bike && (c.w > 14 + c.thr * 10 && (c.eco > .3 || P.bike > .4) || c.w > 100)) {
+    c.bike = true; c.w -= 6; c.dOut += 6; note(c, `bought a Schwinn${c.w > 100 ? ' for short hops around town' : ''}`);
+  }
+  if (!c.car && !c.loan && c.job && Math.random() < .2) {
+    const cash = c.w > 70 + c.thr * 40, fin = !cash && c.w > 18 && surplus > 2.5 + c.thr * 2;
+    const want = (1 - c.eco) * .6 + .25 + shr(c, 'walk') * .2 + shr(c, 'bus') * .2 + (wantCar ? .3 : 0) + c.vain * rich(c) * .3;
+    if (cash && want > .3 || fin && want > .45) {
+      c.car = true; c.fuel = 100;
+      if (cash) { c.w -= 45; c.dOut += 45; note(c, 'bought a new Bel Air outright'); }
+      else { c.w -= 12; c.dOut += 12; c.loan = 40; note(c, `financed a Bel Air: $12 down and $2 a day, with ${surplus.toFixed(1)} a day to spare`); }
+    }
+  }
+  if (gov() && c.pass <= 0 && c.w < 120) {
+    const pp = 5 * (1 - .5 * P.transit), trips = shr(c, 'bus') * 4 * 7, f = tripCost('bus', 1.2 * (1 - .5 * P.transit));
+    if (trips * f > pp * 1.1 && c.w > pp + c.thr * 10) { c.pass = 7; c.w -= pp; c.dOut += pp; G.tre += pp; note(c, `bought a weekly bus pass for ${pp.toFixed(1)}: cheaper than ${trips | 0} tickets`); }
+  }
+}
+
+function rehouse(c) {
+  const cur = c.home.sty, occ = b => C.filter(x => x.home === b).length, bal = c.inc - c.exp;
+  const opts = bt('home').filter(b => b !== c.home && occ(b) < HOMECAP[b.sty]);
+  if (!opts.length) return;
+  const up = c.want && c.want.k === 'house';
+  if ((c.w < 8 || bal < -1) && RENT[cur] > 1.2) {
+    const b = opts.filter(b => RENT[b.sty] < RENT[cur]).sort((a, b) => RENT[a.sty] - RENT[b.sty])[0];
+    if (b) { c.home = b; note(c, `moved into cheaper ${b.sty} housing to cut rent to ${RENT[b.sty]} a day`); }
+  } else if (c.w > (up ? 60 : 90) + c.thr * 60 && bal > (up ? 1.5 : 3) && Math.random() < (up ? .4 : .15)) {
+    const b = opts.filter(b => RENT[b.sty] > RENT[cur] && RENT[b.sty] - RENT[cur] < bal * .6).sort((a, b) => RENT[b.sty] - RENT[a.sty])[0];
+    if (b) { c.home = b; note(c, `moved up to a ${b.sty} home`); }
+  }
+}
+
+// The heart of every citizen: weigh needs, money, habits, cravings, whims, wants and the clock
+function decide(c) {
+  const hh = G.T % 24, night = hh >= 22 || hh < 6, cf = law('curfew');
+  const curf = cf && (hh >= cf.val || hh < 5) && c.h > .4, pen = curf ? 99 : 0;
+  if (c.jail > 0) return go(c, 'jail', `serving a sentence, ${Math.ceil(c.jail / 24)} days left`);
+  if (c.legal) return go(c, 'court', `summoned to trial for ${c.legal.charge}`);
+  const wk = c.whim ? c.whim.k : null, wn = c.want ? c.want.k : null;
+  const spare = c.w - (20 + 40 * c.thr) - Math.max(0, c.exp - c.inc) * 5 + (wk === 'splurge' ? 30 : 0) - (wk === 'thrifty' ? 20 : 0) - (wn === 'car' && !c.car ? 15 : 0);
+  const o = [];
+  const add = (g, s, why, extra) => o.push(Object.assign({ g, why,
+    s: s + (WHIMS[wk] && WHIMS[wk].g === g ? 28 : 0) - (g !== 'home' ? pen : 0) + (c.vq[g] || 0) * 8 }, extra));
+
+  add('home', (100 - c.en) * .9 + (night ? 45 : 0) + (curf ? 90 : 0) - c.anger * 5, `energy ${c.en | 0}${night ? ', and it is night' : ''}${curf ? ', with the curfew on' : ''}`);
+
+  const eat = ['diner', 'grocery', 'bakery', 'drugstore'].filter(isOpen)
+    .map(v => [v, VEN[v].food / price(v) * (spare < 0 ? 1.5 : .6) + (VEN[v].soc ? c.soc * 12 : 0) + Math.min(6, (c.vis[v] || 0) * .5) + gs() * 2])
+    .sort((a, b) => b[1] - a[1])[0];
+  if (eat) add(eat[0], c.hu + (c.w < price(eat[0]) ? -30 : 0), `hunger ${c.hu | 0}${{ diner: ', fancies a booth at the diner', drugstore: ', craving the soda fountain', bakery: ', a fresh loaf from the bakery' }[eat[0]] || ''}`);
+
+  let alt = null;
+  if (c.job && Math.random() < (wn === 'promotion' || wk === 'raise' ? .35 : .12)) { const j = findJob(c); if (j && wageAt(c, j) > wageAt(c, c.job) * 1.15) alt = j; }
+  add('work', (night ? -50 : 30) + Math.max(0, 45 + 30 * c.thr - c.w) * c.dil * 1.2 + c.dil * 10 + (c.exp > c.inc ? 15 : 0) + (wn === 'promotion' ? 8 : 0) - c.hab.alcohol * 20,
+    alt ? `wants a better-paying job as ${JOBS[alt.t].n} at ${JOBS[alt.t].place}` : c.job ? `wealth ${c.w | 0}, ${JOBS[c.job.t].n} shifts pay about ${wageAt(c, c.job) | 0}${c.exp > c.inc ? ', and spending is outrunning income' : ''}` : `out of work with wealth ${c.w | 0}, looking for a job`, { blk: alt });
+
+  const social = wn === 'friends' ? 12 : 0;
+  if (isOpen('park')) add('park', (100 - c.mood) * .5 + c.soc * 14 + social, `mood ${c.mood | 0}${c.soc > .6 ? ', enjoys company' : ''}`);
+  if (isOpen('cinema') && hh >= 17) add('cinema', (100 - c.mood) * .4 + c.soc * 15 + social + (spare > -10 ? 5 : -50), `an evening at the pictures, mood ${c.mood | 0}`);
+  if (isOpen('bar') && hh >= 16 && legal('alcohol')) add('bar', (100 - c.mood) * .35 + c.soc * 12 + c.r * 10 + social + (spare > -5 ? 0 : -50), 'unwinding at the bar after a long day');
+  if (isOpen('club') && hh >= 19) add('club', (100 - c.mood) * .3 + c.soc * 18 + social + (spare > 15 ? 8 : -60), 'a night of jazz at the supper club');
+  if (c.car && isOpen('drivein') && hh >= 19) add('drivein', (100 - c.mood) * .35 + c.soc * 10 + (spare > 0 ? 6 : -50), 'a double feature at the drive-in');
+  if (isOpen('dept')) add('dept', (spare > 10 ? spare * .4 : -50) + (100 - c.mood) * .2 + c.vain * 10, `has ${spare | 0} to spare beyond savings`);
+  if (isOpen('barber')) add('barber', c.groom * .8 - (c.w < 3 ? 50 : 0) + c.vain * 8, 'is due a haircut');
+  if (c.car && c.fuel < 30 && isOpen('gas')) add('gas', 70 - c.fuel * 1.5, `fuel tank at ${c.fuel | 0}%`);
+
+  // cravings: legal ones are bought in shops, banned ones from bootleggers in the park after dark
+  for (const s of SK) {
+    const cr = c.crv[s]; if (cr < .35) continue;
+    if (legal(s)) {
+      const v = VK.find(v => VEN[v].sells.includes(s) && (s !== 'cannabis' || v === 'drugstore') && isOpen(v));
+      if (v) add(v, cr * 55 + c.taste[s] * 8 - (spare < -15 ? 12 : 0), `craving ${SUBS[s].n.toLowerCase()}`);
+    } else if (cr > .55 && (night || hh > 19)) {
+      add('park', cr * 45 * (.4 + c.r) - c.h * 25, `looking for a bootlegger selling ${SUBS[s].n.toLowerCase()}`, { deal: s });
+    }
+  }
+  const fr = fa(c);
+  if (fr.length) add('friend', c.soc * 25 + (100 - c.mood) * .3 + social - (night ? 40 : 0), `wants company, ${fr.length} friends in town`, { blk: byId.get(pick(fr)).home });
+
+  // civic life: election day, council sessions, petitions
+  const eDay = G.day > 0 && G.day % 18 === 0 && hh >= 7 && hh < 19 && c.voted !== G.day;
+  if (c.seat && G.day > 0 && G.day % 6 === 0 && hh >= 8 && hh < 12 && c.att !== G.day) add('hall', 200, 'attending the council session');
+  if (eDay) add('hall', 35 + c.civ * 70 + c.anger * 30, c.anger > .4 ? 'heading to the polls, angry with the council' : 'heading to the polls on election day');
+  if (!night && !c.seat && !eDay && G.day - c.cool >= 5 && Math.random() < .25 + c.anger * .5 + (wk === 'civic' ? .5 : 0)) {
+    const id = ideas(c);
+    if (id) add('hall', id.u * 150 * (.4 + c.civ + c.anger * .5), `wants to start a petition to ${desc(id)}`);
+  }
+
+  o.forEach(x => x.s += gs() * 6);
+  const b = o.reduce((m, x) => x.s > m.s ? x : m);
+  go(c, b.g, b.why, b.blk, b);
+}
+
+function go(c, g, why, blk, opt) {
+  let b = blk;
+  if (!b) b = g === 'home' ? c.home : g === 'work' ? (c.job || findJob(c) || pick(jobBlocks())) : pick(bt(g));
+  c.goal = g; c.tgt = b; c.deal = opt && opt.deal || null;
+  c.plan = ['grocery', 'dept', 'diner', 'drugstore', 'bakery'].includes(g) ? crimeEval(c) : null;
+  if (c.age >= 15) buy(c);
+  c.pred = null; c.st = 'move'; c.mode = 'walk'; c.wait = 0; c.path = [];
+  const d = (Math.abs(X(b.i) - X(c.gx)) + Math.abs(Y(b.j) - Y(c.gy))) / 20;
+  let t = `${LBL[g]}: ${why}`;
+  if (c.plan) t += ` · plans to pocket about ${c.plan.g | 0} (${(c.plan.p * 100) | 0}% chance of being caught)`;
+  if (d > 0) {
+    const a = chooseMode(c, d);
+    c.mode = a.m; c.wait = a.w || 0; c.pred = a.t; c.t0 = G.T; c.w -= a.c; c.dOut += a.c; c.use[a.m]++; today.trips[a.m]++;
+    M.cost = M.cost * .97 + a.c * .03;
+    const tx = law('mtax', a.m), sb = gov() && law('msub', a.m);
+    if (tx) G.tre += tx.val;
+    if (a.m === 'bus') G.tre += a.c;                                          // fares go to the public transit budget
+    else if (sb) G.tre -= sb.val;                                             // other allowances are paid from the treasury
+    if (a.m === 'car') c.fuel -= d * .8;
+    c.path = [[X(b.i), Y(c.gy)], [X(b.i), Y(b.j)]];
+    t += ` · ${VERB[a.m]} (${a.t.toFixed(1)}h${a.c ? ', cost ' + a.c.toFixed(1) : ''}${a.alt ? '; ' + a.alt : ''})`;
+  }
+  note(c, t);
+}
+
+// ---------------------------------------------------------------- arriving somewhere
+function influence(a, b) {                                                   // friends rub off on each other
+  const pa = pvec(a), pb = pvec(b);
+  for (let i = 0; i < 12; i++) { a.lean[i] = cl(a.lean[i] + .03 * (pb[i] - pa[i]), -.4, .4); b.lean[i] = cl(b.lean[i] + .03 * (pa[i] - pb[i]), -.4, .4); }
+  for (const k in b.trust) a.trust[k] = (a.trust[k] || 0) * .96 + b.trust[k] * .04;
+  for (const k in a.trust) b.trust[k] = (b.trust[k] || 0) * .96 + a.trust[k] * .04;
+}
+function bond(c) {
+  for (const o of C) {
+    if (o === c || o.st !== 'do' || o.blk !== c.blk || o.goal !== c.goal || o.age < 15) continue;
+    if (c.fr.includes(o.id)) { influence(c, o); continue; }
+    if (c.fr.length < 6 && o.fr.length < 6 && Math.random() < .25 * (c.soc + o.soc)) {
+      c.fr.push(o.id); o.fr.push(c.id); c.mood = Math.min(100, c.mood + 10); o.mood = Math.min(100, o.mood + 10); influence(c, o);
+      pop(c.blk, '♥', '#ff8fb4', 10);
+      if (Math.random() < .4) glog(`${nm(c)} and ${nm(o)} struck up a friendship at ${VEN[c.goal].place}`, 'soc');
+      return;
+    }
+  }
+}
+
+function arrive(c) {
+  c.st = 'do';
+  const b = c.tgt, g = c.goal; c.gx = b.i; c.gy = b.j; c.blk = b; c.x = X(b.i); c.y = Y(b.j);
+  if (c.pred != null) { const a = G.T - c.t0; M.tripH = M.tripH * .95 + a * .05; c.q[c.mode] += .2 * (cl(c.pred - a, -2, 2) - c.q[c.mode]); c.pred = null; }
+  if (g === 'work') {
+    if (c.job !== b) {
+      if (JOBS[b.t] && staffOf(b) < slotsOf(b) && (JOBS[b.t].sk || 0) <= c.sk) {
+        const was = c.job; staffAdd(was, -1); staffAdd(b, 1); c.job = b; pop(b, 'HIRED', '#9fe0a0');
+        note(c, `was hired as a ${JOBS[b.t].n} at ${JOBS[b.t].place}${was ? `, leaving ${JOBS[was.t].place}` : ''}`);
+        if (c.want && c.want.k === 'promotion' && wageAt(c, b) > c.want.ref * 1.1) achieve(c);
+      } else { note(c, `was turned away at ${JOBS[b.t].place}: no openings`); c.dwell = .3; return; }
+    }
+    c.dwell = 8;
+  } else if (VEN[g]) {
+    c.dwell = VEN[g].dw;
+    if (g === 'park') {
+      c.vis.park = (c.vis.park || 0) + 1; c.mood = Math.min(100, c.mood + VEN.park.mood + (gov() && law('vfund', 'park') ? 8 : 0));
+      c.px = b.x0 + rnd(15, 135); c.py = b.y0 + rnd(15, 135);
+      if (c.deal) blackMarket(c, c.deal);
+    } else venue(c, g);
+    if (VEN[g].soc) bond(c);
+  } else if (g === 'home') c.dwell = Math.max(1, (100 - c.en) / 12);
+  else if (g === 'friend') { c.dwell = 2; c.mood = Math.min(100, c.mood + 20); note(c, 'enjoyed an afternoon with a friend'); const f = C.find(x => x.home === b && c.fr.includes(x.id)); if (f) influence(c, f); }
+  else if (g === 'court') { c.dwell = 2; trial(c); }
+  else if (g === 'hall') {
+    c.dwell = 1;
+    if (c.seat && G.day > 0 && G.day % 6 === 0 && c.att !== G.day) { c.att = G.day; c.dwell = 4; note(c, 'took a seat in the council chamber'); }
+    else if (G.day > 0 && G.day % 18 === 0 && c.voted !== G.day) { c.voted = G.day; note(c, 'cast a ballot at Town Hall'); }
+    else fileBill(c);
+  } else c.dwell = .5;
+}
+
+// A sale: the customer pays, the business takes its cut (minus any mandated discount), the town takes any tax
+function venue(c, v) {
+  const V = VEN[v], pr = price(v), bz = biz[c.blk.id];
+  c.vis[v] = (c.vis[v] || 0) + 1;
+  if (c.plan) {
+    const pl = c.plan; c.plan = null; today.crimes++;
+    if (Math.random() < pl.p0) {
+      c.legal = { charge: pl.g > 8 ? 'grand theft (felony)' : 'petty theft (misdemeanor)', fel: pl.g > 8, ev: cl(.55 + .3 * policePower(), .3, .9) };
+      c.jt++; c.h = Math.min(1, c.h + .03); c.q.steal += .2 * (-P.pen * 3 - c.q.steal); c.anger = Math.min(1, c.anger + .1);
+      pop(c.blk, 'ARRESTED', '#ff6f5a'); glog(`Police nab ${nm(c)} at ${V.place} for ${c.legal.charge}; ${c.w > 15 ? 'bail posted' : 'bail unaffordable'}`, 'crime');
+    } else {
+      c.w += pl.g; if (V.food) c.hu = Math.max(0, c.hu - 30); c.h = Math.max(0, c.h - .01); c.q.steal += .2 * (pl.g * .5 - c.q.steal);
+      note(c, `pocketed ${pl.g | 0} unseen; honesty slips`);
+      const vv = pick(C.filter(x => x.age >= 15)); if (vv) { vv.vic++; vv.anger = Math.min(1, vv.anger + .15); }
+      if (bz) bz.rev -= pl.g * .5;
+    }
+    return;
+  }
+  if (c.w < pr) { note(c, `could not afford ${V.place}`); return; }
+  const disc = law('vsub', v), tax = law('vtax', v), base = V.price * (1 - (disc ? disc.val : 0));
+  c.w -= pr; c.dOut += pr; today.sales += pr; today.vis[v] = (today.vis[v] || 0) + 1;
+  if (tax) G.tre += base * tax.val;
+  if (bz) bz.rev += base;
+  const before = c.mood;
+  if (V.food) c.hu = Math.max(0, c.hu - V.food);
+  c.mood = Math.min(100, c.mood + V.mood + 3 + (gov() && law('vfund', v) ? 8 : 0));
+  if (v === 'barber') c.groom = 0;
+  if (v === 'gas') c.fuel = 100;
+  for (const s of V.sells) if (legal(s) && c.crv[s] > .3 && (s !== 'cannabis' || v === 'drugstore')) {
+    const st = law('stax', s), cost = SUBS[s].price + (st ? st.val : 0);
+    if (c.w < cost) continue;
+    c.w -= cost; c.dOut += cost; if (st) G.tre += st.val; if (bz) bz.rev += SUBS[s].price; today.subs[s] = (today.subs[s] || 0) + 1;
+    consume(c, s);
+  }
+  c.vq[v] = (c.vq[v] || 0) + .2 * (cl((c.mood - before - pr * 2) / 10, -1, 1) - (c.vq[v] || 0));   // learns what is worth the money
+  note(c, `spent ${pr.toFixed(1)} at ${V.place}`);
+}
+
+function consume(c, s) {
+  const S = SUBS[s];
+  c.mood = Math.min(100, c.mood + S.mood * (1 - .4 * c.hab[s]));
+  c.crv[s] = 0; c.hab[s] = Math.min(1, c.hab[s] + S.hook * (.3 + c.taste[s]) * .8); c.used = c.used || {}; c.used[s] = 1;
+  c.anger = Math.max(0, c.anger - .03);
+}
+function blackMarket(c, s) {
+  const p = det(c) * .5, cost = SUBS[s].price * 2;
+  if (c.w < cost) { note(c, 'could not afford the bootlegger’s price'); return; }
+  c.w -= cost; c.dOut += cost; today.crimes++;
+  const dealer = C.filter(x => x.age >= 15 && x.h < .35 && x !== c).sort(() => Math.random() - .5)[0];
+  if (dealer) dealer.w += cost * .8;
+  consume(c, s);
+  if (Math.random() < p) {
+    c.legal = { charge: `possession of ${SUBS[s].n.toLowerCase()} (misdemeanor)`, fel: false, ev: cl(.6 + .3 * policePower(), .3, .9) };
+    c.jt += .5; pop(c.blk, 'ARRESTED', '#ff6f5a'); glog(`Police catch ${nm(c)} buying ${SUBS[s].n.toLowerCase()} from a bootlegger in the park`, 'crime');
+  } else note(c, `bought ${SUBS[s].n.toLowerCase()} from a bootlegger${dealer ? ` (${nm(dealer)})` : ''}`);
+}
+
+function trial(c) {
+  const L = c.legal; if (!L) return;
+  c.legal = null;
+  const def = c.w > 40 ? .18 : .05;
+  let out, g = 0, n = 6;
+  if (law('jury')) {
+    const pool = C.filter(x => x !== c && x.age >= 15 && x.jail <= 0).sort(() => Math.random() - .5).slice(0, 6);
+    n = pool.length; g = pool.filter(j => Math.random() < cl(L.ev + (j.h - .5) * .5 - def + cl(j.vic, 0, 2) * .05, 0, 1)).length;
+    out = g <= Math.floor(n / 6) ? 'Acquitted.' : g < Math.ceil(n * 5 / 6) ? 'Hung jury, charges dropped.' : 'G';
+  } else out = Math.random() < cl(L.ev - def, 0, 1) ? 'G' : 'Acquitted by the judge.';
+  if (out === 'G') {
+    const days = L.fel ? P.pen : Math.max(1, Math.round(P.pen / 3));
+    if (c.w > 25 && Math.random() < .25) out = 'Convicted, but won an appeal.';
+    else { c.jail = days * 24; out = `Convicted. Sentence: ${days} days.`; c.anger = Math.min(1, c.anger + .1); }
+  }
+  glog(`Trial of ${nm(c)} for ${L.charge}${law('jury') ? `: jury ${g}-${n - g}` : ' (judge alone)'}. ${out}`, 'crime');
+}
+
+function finish(c) {
+  if (c.goal === 'work' && c.job) {
+    const w = wageAt(c, c.job), net = w * (1 - P.tax);
+    c.w += net; c.dIn += net; today.pay += w;
+    if (JOBS[c.job.t].gov) G.tre -= net; else G.tre += w * P.tax;           // public payroll comes out of the treasury
+    note(c, `finished a shift as a ${JOBS[c.job.t].n}: earned ${net.toFixed(0)} after tax`);
+  }
+  if (c.goal === 'jail' && c.jail > 0) { c.dwell = .5; return; }
+  if (c.goal === 'jail') note(c, 'released from jail');
+  decide(c);
+}
+
+function move(c, dt) {
+  if (c.mode === 'bus' && !isFinite(busWait())) {
+    c.mode = 'walk'; c.wait = 0; c.anger = Math.min(1, c.anger + .1); note(c, 'found the buses not running and set off on foot, fuming');
+  }
+  if (c.wait > 0) { c.wait -= dt; return; }
+  const w = c.path[0];
+  if (!w) { arrive(c); return; }
+  let v = (c.mode === 'walk' ? 15 : c.mode === 'bike' ? 18 + 22 * P.bike * inf() : c.mode === 'bus' ? 28 : 60 * (1 + .4 * P.road * inf()) / (1 + cong * .5)) * 20;
+  const pp = policePower();
+  if (c.mode === 'car' && c.r > .55) {
+    v *= 1.25;
+    if (law('reckless') && Math.random() < dt * .15 * pp * 2) { c.w -= 4; G.tre += 4; c.jt += .3; c.anger = Math.min(1, c.anger + .05); glog(`${nm(c)} fined $4 for reckless driving`, 'crime'); }
+  }
+  const cf = law('curfew');
+  if (cf && (G.T % 24 >= cf.val || G.T % 24 < 5) && Math.random() < dt * .4 * pp) { c.w -= 3; G.tre += 3; note(c, 'was fined $3 for breaking curfew'); }
+  const jw = law('jaywalk');
+  if (jw && c.mode === 'walk' && c.r > .5 && Math.random() < dt * .1 * pp) { c.w -= jw.val; G.tre += jw.val; note(c, `was fined $${jw.val} for jaywalking`); }
+  const dx = w[0] - c.x, dy = w[1] - c.y, L = Math.hypot(dx, dy), s = v * dt;
+  if (L > .5) { c.hx = dx / L; c.hy = dy / L; }
+  c.stp += Math.min(s, L);
+  if (s >= L) { c.x = w[0]; c.y = w[1]; c.path.shift(); } else { c.x += c.hx * s; c.y += c.hy * s; }
+}
+
+// ---------------------------------------------------------------- petitions
+function fileBill(c) {
+  const b = ideas(c); c.cool = G.day;
+  if (!b) { note(c, 'visited Town Hall but thought better of filing anything'); return; }
+  const pp = pers(c, b), dup = docket.find(x => desc(x) === desc(b));
+  const r = Math.abs(billU(c, b) - pp) > Math.abs(pp) ? (G.tre < 0 ? 'wants the treasury back in the black' : 'worries about the town budget') : why(c, b);
+  if (dup) { dup.co++; note(c, `signed the petition to ${desc(b)}`); }
+  else { docket.push({ ...b, id: ++G.bid, spon: c, r, co: 0, day: G.day, sup: null }); glog(`${nm(c)} starts a petition to ${desc(b)}. Reason: ${r}.${fisTxt(b)}`, 'gov'); }
+  paintDocket();
+}
+function why(c, b) {                                                     // the reason a citizen gives, tied to the bill where possible
+  const l = b && (b.nl || b.law), wk = c.whim && c.whim.k;
+  if (l && (l.type === 'ban' || l.type === 'stax')) return c.hab[l.tgt] > .3 ? `has grown fond of ${SUBS[l.tgt].n.toLowerCase()}` : c.hc > .6 ? 'worries about the town’s health' : 'thinks people should choose for themselves';
+  if (l && VEN[l.tgt]) { const ob = owned(c); return ob && ob.t === l.tgt ? `runs ${VEN[l.tgt].place}` : c.job && c.job.t === l.tgt ? `works at ${VEN[l.tgt].place}` : (c.vis[l.tgt] || 0) > 1 ? `goes to ${VEN[l.tgt].place} often` : 'thinks it would help the town'; }
+  if (l && (l.type === 'mtax' || l.type === 'msub')) return shr(c, l.tgt) > .3 ? `relies on ${l.tgt === 'car' ? 'the car' : l.tgt === 'bus' ? 'the bus' : 'a bicycle'}` : 'is tired of the traffic';
+  if (b && b.kind === 'set' && b.key === 'tax') return c.w > 60 ? 'pays a lot in tax' : 'wants better services';
+  if (b && b.kind === 'set' && b.key === 'police') return c.vic > .5 ? 'was robbed recently' : c.jt > .5 ? 'has had run-ins with the police' : 'has views on policing';
+  return c.anger > .5 ? 'is angry with how the town is run' : c.vic > 1 ? 'was robbed recently' : c.jt > 1 ? 'was locked up recently'
+    : c.owns != null && Math.random() < .5 ? `runs ${VEN[blocks[c.owns].t].place}` : c.w < 8 ? 'is struggling to make ends meet' : !c.job ? 'cannot find work'
+    : wk && WHIMS[wk] && !WHIMS[wk].g ? `is ${WHIMS[wk].n}` : SK.some(s => c.hab[s] > .5) ? `has grown fond of ${SUBS[SK.find(s => c.hab[s] > .5)].n.toLowerCase()}`
+    : c.w > 90 ? 'is comfortable and pays a lot in tax' : shr(c, 'car') > .5 ? 'spends life in traffic' : shr(c, 'bus') > .4 ? 'rides the bus daily'
+    : shr(c, 'bike') > .4 ? 'bikes everywhere' : c.soc > .7 ? 'loves a night out' : 'thinks the town can do better';
+}
+
+// ---------------------------------------------------------------- whims, wants and achievements
+function achieve(c) {
+  const w = c.want; if (!w) return;
+  c.mood = Math.min(100, c.mood + 25); pop(c.home, '★', '#ffd23f', -10);
+  note(c, `achieved a dream: ${WANTS[w.k].n}`);
+  if (Math.random() < .3) glog(`${nm(c)} achieved a long-held dream: to ${WANTS[w.k].n}`, 'soc');
+  c.want = chooseWant(c);
+}
+function checkWants(c) {
+  const w = c.want; if (!w) { c.want = chooseWant(c); return; }
+  const done = w.k === 'car' ? c.car : w.k === 'house' ? c.home.id !== w.ref && RENT[c.home.sty] > RENT[blocks[w.ref].sty]
+    : w.k === 'office' ? c.seat : w.k === 'business' ? c.owns != null : w.k === 'friends' ? fa(c).length >= w.ref + 2 : false;
+  if (done) achieve(c);
+  else if (G.day - w.since > 60 && Math.random() < .1) { note(c, `gave up trying to ${WANTS[w.k].n}`); c.mood -= 5; c.want = chooseWant(c); }
+}
+function rollWhim(c) {
+  if (c.whim && c.whim.until > G.day) return;
+  c.whim = null;
+  if (Math.random() < .4) { const k = wpick(Object.keys(WHIMS).map(k => [k, WHIMS[k].w(c)])); c.whim = { k, until: G.day + 1 + (Math.random() * 3 | 0) }; }
+}
+
+// ---------------------------------------------------------------- businesses
+function setupBusinesses() {
+  biz = {};
+  const pool = adults().filter(c => c.w > 25);
+  for (const b of blocks) if (VEN[b.t] && !VEN[b.t].pub) {
+    const owner = pool.filter(c => c.owns == null).sort((a, x) => (x.sk + rich(x) + x.r * .3 + Math.random() * .5) - (a.sk + rich(a) + a.r * .3 + Math.random() * .5))[0];
+    biz[b.id] = { owner: owner ? owner.id : null, rev: 0, last: VEN[b.t].price * 12, avg: VEN[b.t].price * 12 };
+    if (owner) { owner.owns = b.id; owner.job = b; }
+  }
+}
+function businessDay() {
+  for (const id in biz) {
+    const z = biz[id], b = blocks[id], v = b.t, o = byId.get(z.owner);
+    z.last = Math.max(0, z.rev); z.rev = 0;
+    const prevAvg = z.avg; z.avg = z.avg * .8 + z.last * .2;
+    if (o) {
+      const profit = z.last * .35; o.w += profit; o.dIn += profit;
+      if (z.avg < prevAvg * .92 && law('vsub', v)) {
+        o.anger = Math.min(1, o.anger + .15);
+        note(o, `watched takings at ${VEN[v].place} fall under the ${lname(law('vsub', v))}`);
+        if (Math.random() < .3) glog(`${nm(o)}, owner of ${VEN[v].place}, says the ${lname(law('vsub', v))} is eating into the till`, 'econ');
+      }
+    } else {
+      const buyer = adults().filter(c => c.owns == null && c.w > 110 && (c.want && c.want.k === 'business' || c.vain > .6)).sort((a, x) => x.w - a.w)[0];
+      if (buyer) {
+        buyer.w -= 60; buyer.dOut += 60; G.tre += 60; buyer.owns = b.id; staffAdd(buyer.job, -1); buyer.job = b; staffAdd(b, 1); z.owner = buyer.id;
+        pop(b, 'NEW OWNER', '#e0b64a'); glog(`${nm(buyer)} buys ${VEN[v].place}`, 'econ');
+        if (buyer.want && buyer.want.k === 'business') achieve(buyer);
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------- the day
+function daily() {
+  G.day++;
+  const g0 = gov(), A = adults(), nA = C.length || 1;
+  const funds = laws.filter(l => l.type === 'vfund').length * 12, quota = laws.filter(l => l.type === 'quota').reduce((s, l) => s + l.val * 3, 0);
+  G.tre -= g0 ? P.police * C.length * .04 + (P.transit + P.bike + P.road) * C.length * 1.4 + funds + quota : (P.road + P.bike) * C.length * .12;
+  M.crime = M.crime * .8 + today.crimes / nA * .2; M.sales = M.sales * .7 + today.sales * .3; M.pay = M.pay * .7 + today.pay * .3;
+  for (const v of VK) M.vis[v] = (M.vis[v] || 0) * .7 + (today.vis[v] || 0) * .3;
+  for (const m of MODES) M.trips[m] = M.trips[m] * .7 + today.trips[m] * .3;
+  for (const s of SK) M.subs[s] = (M.subs[s] || 0) * .7 + (today.subs[s] || 0) * .3;
+  today = { crimes: 0, sales: 0, pay: 0, vis: {}, trips: { walk: 0, bike: 0, bus: 0, car: 0 }, subs: {} };
+  businessDay();
+
+  const wt = law('wtax'), dv = g0 && law('dividend'), wf = g0 && law('welfare'), rc = law('rent'), kids = [];
+  for (const c of C) {
+    c.age++; c.vic *= .97; c.jt *= .97; c.anger *= .85;
+    for (const k in c.trust) c.trust[k] *= .97;
+    MODES.forEach(m => c.use[m] *= .97);
+    for (const v in c.vis) c.vis[v] *= .95;
+    // substances: habits fade when unused, heavy use wears down health and shortens life
+    let harm = 0;
+    for (const s of SK) { c.hab[s] *= c.used && c.used[s] ? .99 : .95; harm += Math.pow(c.hab[s], 1.5) * SUBS[s].harm * 2.2; }
+    c.used = {}; c.hp -= harm; c.max -= harm * .4;
+    if (harm > .5 && Math.random() < .1) note(c, 'is feeling the toll of heavy habits');
+    if (c.age < 15) continue;
+    const rent = Math.min(RENT[c.home.sty], rc ? 1.8 : 99);
+    c.w -= rent; c.dOut += rent; c.mood = Math.min(100, c.mood + HOMEJOY[c.home.sty] - c.anger * 6);
+    if (c.pass > 0) c.pass--;
+    if (c.loan > 0) {
+      if (c.w >= 2) { c.w -= 2; c.dOut += 2; c.loan -= 2; if (c.loan <= 0) { c.loan = 0; note(c, 'paid off the car loan'); } }
+      else { c.car = false; c.loan = 0; c.anger = Math.min(1, c.anger + .2); glog(`${nm(c)} missed a car payment and the Bel Air was repossessed`, 'econ'); }
+    }
+    if (dv && G.tre > 0) { c.w += dv.val; c.dIn += dv.val; G.tre -= dv.val; }
+    if (wt && c.w > 60) { const x = Math.min(3, (c.w - 60) * wt.val); c.w -= x; c.dOut += x; G.tre += x; }
+    if (c.w < 2 && wf && G.tre > 5) { c.w += wf.val; c.dIn += wf.val; G.tre -= wf.val; }
+    if (c.w < 0) { c.w = 0; c.hp -= .5; c.cod = 'destitution'; }
+    c.inc = c.inc * .75 + c.dIn * .25; c.exp = c.exp * .75 + c.dOut * .25; c.dIn = 0; c.dOut = 0;
+    rehouse(c); rollWhim(c); checkWants(c);
+    if (c.w < 10) c.dil = Math.min(1, c.dil + .01); else if (c.w > 80) c.dil = Math.max(0, c.dil - .005);
+    if (c.q.bike > .2 || c.q.bus > .2) c.eco = Math.min(1, c.eco + .01); else if (c.q.car > .2) c.eco = Math.max(0, c.eco - .004);
+    if (c.want && c.want.k === 'office') c.civ = Math.min(1, c.civ + .004);
+    const fam = c.want && c.want.k === 'family';
+    if (c.age > 40 && c.w > 80 && c.hp > 7 && c.jail <= 0 && Math.random() < (fam ? .07 : .03) && C.length + kids.length < (rc ? 180 : 210)) { c.w -= 25; kids.push(c); }
+  }
+  const bb = law('baby');
+  kids.forEach(p => {
+    makeCitizen(p); G.births++; pop(p.home, 'NEW BABY', '#f2e8cf', -20);
+    if (bb && gov()) { p.w += bb.val; G.tre -= bb.val; }
+    if (p.want && p.want.k === 'family') achieve(p);
+    if (Math.random() < .5) glog(`A baby is born to ${nm(p)}`, 'soc');
+  });
+  for (const b of jobBlocks()) {
+    const e = C.filter(c => c.job === b && c.owns !== b.id), s = slotsOf(b) - (biz[b.id] && byId.has(biz[b.id].owner) ? 1 : 0);
+    if (e.length > s) e.slice(Math.max(0, s)).forEach(c => { c.job = null; c.anger = Math.min(1, c.anger + .3); glog(`${nm(c)} is laid off at ${JOBS[b.t].place}`, 'econ'); });
+  }
+  staffMemo.t = -1;
+  C = C.filter(c => {
+    if (c.age > c.max || c.hp <= 0) {
+      G.deaths++; if (c.hp <= 0) glog(`${nm(c)} died of ${c.cod || 'poor health'}`, 'crime');
+      if (c.owns != null && biz[c.owns]) { biz[c.owns].owner = null; glog(`${VEN[blocks[c.owns].t].place} is up for sale after ${nm(c)}’s death`, 'econ'); }
+      byId.delete(c.id); if (sel === c) sel = null; return false;
+    }
+    return true;
+  });
+  partyLife(); calc(); recordPulse(); paintScore(); paintPulse(); paintCouncil();
+  const tj = jobBlocks().reduce((s, b) => s + slotsOf(b), 0);
+  if (M.tj && tj - M.tj >= 3) glog(`Hollowbrook grows: employers add ${tj - M.tj} positions, ${tj} jobs in town`, 'econ');
+  M.tj = tj;
+  G.lastDelta = G.tre - G.treY; G.treY = G.tre; ledger();
+  autosave();
+  if (!C.length) { G.paused = true; glog('The town is empty. Start a new town to try different laws.', 'crime'); }
+}
+
+function stopBuses() {
+  for (const c of C) {
+    if (c.job && JOBS[c.job.t].gov) { c.job = null; c.anger = Math.min(1, c.anger + .3); note(c, 'was sent home without pay when the treasury ran dry'); }
+    c.anger = Math.min(1, c.anger + .1 + .35 * shr(c, 'bus'));
+    for (const p of coalition) c.trust[p.id] = (c.trust[p.id] || 0) - .15 - .4 * shr(c, 'bus');
+    if (c.st === 'move' && c.mode === 'bus') { c.mode = 'walk'; c.wait = 0; note(c, 'was turned off the bus when service stopped, and blames the council'); }
+  }
+}
+
+function step(h) {
+  G.T += h;
+  if (Math.floor(G.T / 24) > G.day) daily();
+  const hh = G.T % 24;
+  if (G.day > 0 && G.day % 6 === 0 && hh >= 12 && G.sessDay !== G.day) { G.sessDay = G.day; session(); }
+  if (G.day > 0 && G.day % 18 === 0 && hh >= 19 && G.elecDay !== G.day) { G.elecDay = G.day; election(false); }
+  if (G.broke ? G.tre > Math.max(60, C.length * 2) : G.tre < 0) {             // hysteresis keeps services from flickering
+    G.broke = !G.broke;
+    pop(hallB(), G.broke ? 'TREASURY EMPTY' : 'SERVICES RESUME', G.broke ? '#ff6f5a' : '#9fe0a0', -10);
+    if (G.broke) stopBuses();
+    glog(G.broke ? 'Treasury empty: buses halt, police stand down, and relief and subsidies stop. Citizens blame the governing parties.' : 'Treasury back in the black: town services resume', 'econ');
+    ledger();
+  }
+  cong = Math.min(2, C.filter(c => c.mode === 'car' && c.st === 'move').length / (14 + P.road * 40));
+  for (const c of C) {
+    const asleep = c.goal === 'home' && c.st === 'do';
+    c.hu = Math.min(100, c.hu + (asleep ? 1.5 : 3) * h);
+    c.en = asleep ? Math.min(100, c.en + 12 * h) : Math.max(0, c.en - 3.5 * h);
+    c.mood = cl(c.mood - h, 0, 100); c.groom = Math.min(100, c.groom + .6 * h);
+    for (const s of SK) c.crv[s] = Math.min(1, c.crv[s] + h * (.006 * c.taste[s] ** 2 + .025 * c.hab[s] * (.3 + c.taste[s])));
+    if (c.hu >= 100) { c.hp -= h * .5; c.cod = 'starvation'; } else c.hp = Math.min(10, c.hp + .025 * h);
+    if (c.goal === 'jail' && c.st === 'do' && c.jail > 0) { c.jail -= h; c.hu = Math.min(c.hu, 60); }
+    if (c.age < 15) { c.hu = Math.min(c.hu, 35); continue; }                // children are fed at home
+    if (c.st === 'move') move(c, h); else { c.dwell -= h; if (c.dwell <= 0) finish(c); }
+  }
+}
+
+/* =============================================================================
+   3  GOVERNMENT
+   ============================================================================= */
+
+// ---------------------------------------------------------------- how a citizen values a law
+function whimBias(c, l) {
+  const k = c.whim && c.whim.k;
+  if (!k) return 0;
+  if (k === 'safety' && (l.type === 'curfew' || l.type === 'theft')) return .25;
+  if (k === 'traffic' && (l.type === 'mtax' && l.tgt === 'car' || l.type === 'msub' && l.tgt === 'bus')) return .22;
+  if (k === 'raise' && l.type === 'minwage') return .3;
+  if (k === 'drink' && l.type === 'ban' && l.tgt === 'alcohol') return -.4;
+  if (k === 'thrifty' && (l.type === 'dividend' || l.type === 'vsub')) return .15;
+  return 0;
+}
+function ben(c, l) {
+  const r = rich(c), vic = cl(c.vic, 0, 3) / 3, jt = cl(c.jt, 0, 3) / 3, f = v => cl((c.vis[v] || 0) / 4, 0, 1.5);
+  const ob = owned(c), own = ob && ob.t === l.tgt, sells = s => ob && VEN[ob.t].sells.includes(s);
+  let u = 0;
+  switch (l.type) {
+    case 'vtax': u = -l.val * f(l.tgt) * 3 + .4 * l.val * (1 - r) - (own ? l.val * 2.5 : 0); break;
+    case 'vsub': u = VEN[l.tgt].price * l.val * (c.vis[l.tgt] || 0) * .05 / Math.max(4, c.inc) * 4 - (own ? l.val * 5 : 0) - (c.job && c.job.t === l.tgt ? l.val * 2 : 0) - .3 * l.val * c.sk - .2 * l.val * c.fis; break;   // owners and staff pay for discounts
+    case 'hours': u = -f(l.tgt) * (VEN[l.tgt].open[1] - l.val) * .15 + .35 * c.h * vic + .1 * c.h - .25 * c.soc - (own ? .8 : 0); break;
+    case 'vfund': u = f(l.tgt) * .8 - .25 * r + (own ? .6 : 0); break;
+    case 'mtax': u = -shr(c, l.tgt) * l.val * .6 + (l.tgt === 'car' ? .4 * c.eco + .3 * (1 - shr(c, 'car')) : -.2 * c.eco) * l.val * .3; break;
+    case 'msub': u = shr(c, l.tgt) * l.val * .8 - .3 * r + (l.tgt === 'car' ? -.2 : .2) * c.eco; break;
+    case 'quota': u = (c.job ? -.1 : c.sk >= (JOBS[l.tgt].sk || 0) ? .7 : .2) - .2 * r; break;
+    case 'minwage': u = c.job && !ob ? (1 - r) * (l.val - 1) * 3 - r * .4 : -(l.val - 1) * (ob ? 3 : 2); break;
+    case 'wtax': u = c.w > 60 ? -l.val * 25 : l.val * 10; break;
+    case 'dividend': u = l.val * .3 - r * l.val * .25; break;
+    case 'curfew': u = (.5 * c.h + .5 * vic - .7 * c.soc - .5 * c.r) * (25 - l.val) / 3 - (ob && VEN[ob.t].open[1] > l.val ? .5 : 0); break;
+    case 'jaywalk': u = -shr(c, 'walk') * .8 + shr(c, 'car') * .4; break;
+    case 'baby': u = .3 - .25 * r + (c.want && c.want.k === 'family' ? .4 : 0); break;
+    case 'rent': u = .6 * (1 - r) - .4 * r; break;
+    case 'welfare': u = (.7 * (1 - r) - .4 * r) * l.val / 2; break;
+    case 'theft': u = .8 * c.h - .2 * c.r + .3 * vic - .1 + (ob ? .3 : 0); break;
+    case 'jury': u = .1 + .5 * jt - .2 * vic; break;
+    case 'reckless': u = .5 * (1 - c.r) - .4 * shr(c, 'car') * c.r; break;
+    case 'ban': { const s = l.tgt; u = -(c.hab[s] * 1.6 + c.taste[s] * .5) + c.hc * .4 + (s === 'alcohol' || s === 'cannabis' ? c.h * .25 + vic * .3 : 0) - c.r * .15 - .15 - (sells(s) ? .9 : 0); break; }
+    case 'stax': u = -(c.hab[l.tgt] + c.taste[l.tgt] * .3) * l.val * .6 + c.hc * .2 + .1 * (1 - r) - (sells(l.tgt) ? .4 : 0); break;
+  }
+  return u + whimBias(c, l);
+}
+
+// Where a citizen would like each budget dial; shaped by circumstance, whims, wants and friends (lean)
+const LI = { police: 0, pen: 1, tax: 2, transit: 3, bike: 4, road: 5 };
+function ideal(c, k) {
+  const rc = cl(c.w / 40, 0, 1), vic = cl(c.vic, 0, 3) / 3, jt = cl(c.jt, 0, 3) / 3, wk = c.whim && c.whim.k, wn = c.want && c.want.k;
+  let v;
+  switch (k) {
+    case 'police': v = .15 + .45 * c.h + .25 * rc + .25 * vic - .3 * c.r - .3 * jt + (wk === 'safety' ? .15 : 0) + (c.owns != null ? .1 : 0); break;
+    case 'pen': v = .1 + .5 * c.h + .3 * vic + .15 * rc - .4 * jt - .2 * c.r; break;
+    case 'tax': v = (.32 - .26 * rc - .05 * (1 - c.h) + (c.w < 5 ? .04 : 0)) / .4; break;
+    case 'transit': v = .1 + .8 * shr(c, 'bus') + .2 * c.eco - (c.car ? .2 : 0) + (wk === 'traffic' ? .1 : 0); break;
+    case 'bike': v = .1 + .8 * shr(c, 'bike') + .3 * c.eco; break;
+    default: v = .1 + .7 * shr(c, 'car') + (c.car ? .2 : 0) + (wn === 'car' ? .1 : 0) - (wk === 'traffic' ? .05 : 0);
+  }
+  v = cl(v + c.lean[LI[k]], 0, 1);
+  return k === 'pen' ? 1 + 19 * v : k === 'tax' ? v * .4 : v;
+}
+// A citizen's political position: budget dials, wealth, eco, honesty, hawkishness, attitudes to drink and cannabis
+const pvec = c => [ideal(c, 'police'), (ideal(c, 'pen') - 1) / 19, ideal(c, 'tax') / .4, ideal(c, 'transit'), ideal(c, 'bike'), ideal(c, 'road'),
+  cl(rich(c) + c.lean[6], 0, 1), cl(c.eco + c.lean[7], 0, 1), cl(c.h + c.lean[8], 0, 1), cl(c.fis + c.lean[9], 0, 1),
+  cl(perm(c, 'alcohol') + c.lean[10], 0, 1), cl(perm(c, 'cannabis') + c.lean[11], 0, 1)];
+const dist = (a, b) => Math.sqrt(a.reduce((s, v, i) => s + (v - b[i]) ** 2, 0) / a.length);
+const wdist = (pv, v) => {                                                   // voters weigh the issues they feel strongly about
+  let s = 0, t = 0;
+  for (let i = 0; i < pv.length; i++) { const w = Math.abs(pv[i] - .5) * 2 + .25; s += w * (pv[i] - v[i]) ** 2; t += w; }
+  return Math.sqrt(s / t);
+};
+
+// ---------------------------------------------------------------- the town budget in every vote
+let fxMemo = { d: -1, m: new Map() };
+function fx(l) {                                                             // estimated daily effect of a law on the treasury
+  if (fxMemo.d !== G.day) fxMemo = { d: G.day, m: new Map() };
+  const key = `${l.type}:${l.tgt || ''}:${l.val}`;
+  if (fxMemo.m.has(key)) return fxMemo.m.get(key);
+  const n = adults().length || 1, v = l.val;
+  let r = 0;
+  switch (l.type) {
+    case 'vtax': r = VEN[l.tgt].price * v * (M.vis[l.tgt] || 1); break;
+    case 'vfund': r = -12; break;
+    case 'quota': r = -v * 3; break;
+    case 'mtax': r = v * (M.trips[l.tgt] || 1); break;
+    case 'msub': r = -v * (M.trips[l.tgt] || 1); break;
+    case 'wtax': r = C.reduce((s, c) => s + Math.min(3, Math.max(0, c.w - 60) * v), 0); break;
+    case 'dividend': r = -v * n; break;
+    case 'baby': r = -v * .4; break;
+    case 'welfare': r = -v * Math.max(1, C.filter(c => c.w < 4).length); break;
+    case 'minwage': r = M.pay * P.tax * (v - 1) * .6; break;
+    case 'stax': r = v * (M.subs[l.tgt] || 1); break;
+    case 'ban': { const st = law('stax', l.tgt); r = -(st ? st.val * (M.subs[l.tgt] || 1) : 0) - 4; break; }
+  }
+  fxMemo.m.set(key, r);
+  return r;
+}
+function fiscal(b) {
+  if (b.kind === 'enact') return fx(b.nl);
+  if (b.kind === 'repeal') return -fx(b.law);
+  if (b.kind === 'amend') return fx(b.nl) - fx(b.law);
+  const d = b.val - P[b.key];
+  return b.key === 'tax' ? M.pay * d : b.key === 'police' ? -d * (14 * 12 * (1 - P.tax) + C.length * .04) : b.key === 'pen' ? 0 : -d * C.length * 1.4;
+}
+function pers(c, b) {
+  if (b.kind === 'set') { const L = LAWS[b.key], id = ideal(c, b.key); return (Math.abs(id - P[b.key]) - Math.abs(id - b.val)) / (L.hi - L.lo) * 2.5; }
+  return b.kind === 'enact' ? ben(c, b.nl) : b.kind === 'repeal' ? -ben(c, b.law) : ben(c, b.nl) - ben(c, b.law);
+}
+function press() {                                                           // how much the books weigh on minds today
+  const n = Math.max(50, C.length);
+  const base = G.tre < 0 ? 1.4 : Math.exp(-G.tre / (8 * n)) - .35 * cl((G.tre - 15 * n) / (30 * n), 0, 1);
+  return base + cl(-G.lastDelta / (3 * n), 0, 1) * .7 - cl(G.lastDelta / (6 * n), 0, 1) * .2;
+}
+const billU = (c, b) => pers(c, b) + fiscal(b) / Math.max(20, C.length) * (.3 + c.fis) * press() * .8;
+const fisTxt = b => { const f = fiscal(b); return Math.abs(f) < 1 ? '' : ` Budget effect: about ${f > 0 ? '+' : ''}${Math.round(f)} a day.`; };
+const tk = x => x.kind === 'set' ? 'set:' + x.key : x.kind + ':' + (x.nl || x.law).type + ':' + ((x.nl || x.law).tgt || '');
+const desc = b => b.kind === 'set' ? `set ${LN[b.key].toLowerCase()} to ${fmt(b.key, b.val)}` : b.kind === 'enact' ? `pass the ${lname(b.nl)}`
+  : b.kind === 'repeal' ? `repeal the ${lname(b.law)}` : `replace the ${lname(b.law)} with the ${lname(b.nl)}`;
+
+// A citizen's best idea for the town, judged by their own interests and the town's books
+function ideas(c) {
+  let best = null;
+  const add = x => { x.u = billU(c, x) + gs() * .03; if (!best || x.u > best.u) best = x; };
+  for (const k in LAWS) {
+    const L = LAWS[k];
+    for (const s of [-1, 1]) { const val = Math.round(cl(P[k] + s * L.st, L.lo, L.hi) * 100) / 100; if (val !== P[k]) add({ kind: 'set', key: k, val }); }
+  }
+  for (const l of laws) {
+    add({ kind: 'repeal', law: l });
+    const vs = TPL[l.type].vals;
+    if (vs && vs.length > 1) add({ kind: 'amend', law: l, nl: { ...l, val: pick(vs.filter(v => v !== l.val)) } });
+  }
+  for (let k = 0; k < 7; k++) {
+    const type = pick(TK), tp = TPL[type], tgt = tp.tg ? tp.tg(c) : null;
+    if (laws.some(l => l.type === type && (l.tgt || null) === tgt)) continue;
+    add({ kind: 'enact', nl: { type, tgt, val: tp.vals ? pick(tp.vals) : null } });
+  }
+  return best && best.u > .1 ? best : null;
+}
+
+// ---------------------------------------------------------------- parties
+const PN1 = ['Civic', 'Main Street', 'People’s', 'Progressive', 'Union', 'Commonwealth', 'Good Government', 'Hollowbrook', 'Citizens’', 'Reform'];
+const PN2 = ['League', 'Alliance', 'Party', 'Ticket', 'Association', 'Caucus'];
+const PCOL = ['#c4482f', '#2a9aa3', '#d4a63a', '#7a5ac8', '#3f8a4a', '#c86b8a', '#5b6a7a', '#e07a2a', '#2f5fa8', '#8a6a2a', '#b03a6a', '#4aa38a'];
+const freeCol = () => PCOL.find(x => !parties.some(q => q.col === x)) || PCOL[G.pid % PCOL.length];
+const party = id => parties.find(p => p.id === id);
+const pname = c => { const p = party(c.party); return p ? p.name : 'Independent'; };
+const pcol = c => { const p = party(c.party); return p ? p.col : '#9aa0a6'; };
+const inCoal = c => coalition.some(p => p.id === c.party);
+
+function themes(v) {                                                         // a new party's name reflects what it wants
+  const t = [];
+  if (v[2] < .38) t.push('Taxpayers’'); if (v[3] > .6) t.push('Transit Riders’'); if (v[5] > .62) t.push('Motorists’');
+  if (v[0] > .62) t.push('Law and Order'); if (v[10] < .35) t.push('Temperance'); if (v[11] > .62) t.push('Liberty');
+  if (v[6] < .3) t.push('Workingmen’s'); if (v[4] > .6) t.push('Cyclists’'); if (v[9] > .66) t.push('Sound Money');
+  return t;
+}
+function newName(v) {
+  const th = themes(v || Array(12).fill(.5));
+  for (let k = 0; k < 300; k++) {
+    const n = `${th.length && Math.random() < .75 ? pick(th) : pick(PN1)} ${pick(PN2)}`;
+    if (!usedNames.has(n) && !parties.some(p => p.name.split(' ')[0] === n.split(' ')[0])) { usedNames.add(n); return n; }
+  }
+  const n = `Party No. ${G.pid + 1}`; usedNames.add(n); return n;
+}
+function platform(p) {
+  const ms = C.filter(c => c.party === p.id);
+  if (ms.length) p.v = ms.map(pvec).reduce((a, v) => a.map((x, i) => x + v[i] / ms.length), Array(12).fill(0));
+  p.n = ms.length;
+}
+function pdesc(p) {
+  const v = p.v, t = [];
+  if (v[2] > .6) t.push('higher taxes'); else if (v[2] < .4) t.push('lower taxes');
+  if (v[0] > .6) t.push('more police'); else if (v[0] < .35) t.push('lighter policing');
+  if (v[3] > .55) t.push('better transit'); if (v[5] > .55) t.push('better roads'); if (v[4] > .55) t.push('bike lanes');
+  if (v[10] < .38) t.push('temperance'); else if (v[10] > .64) t.push('open saloons');
+  if (v[11] > .6) t.push('legal cannabis'); else if (v[11] < .32) t.push('keeping cannabis banned');
+  if (v[9] > .6) t.push('a balanced budget');
+  return t.length ? t.slice(0, 4).join(', ') : 'the middle of the road';
+}
+
+// The three founding parties grow out of real clusters of opinion among the most civic-minded
+function seedParties() {
+  usedNames.clear();
+  const A = adults().sort((a, b) => b.civ - a.civ).slice(0, 54), V = A.map(pvec);
+  let cen = [0, 1, 2].map(k => V[Math.floor(k * V.length / 3)].slice());
+  for (let it = 0; it < 10; it++) {
+    const as = V.map(v => cen.reduce((b, c, i) => dist(v, c) < dist(v, cen[b]) ? i : b, 0));
+    cen = cen.map((c, i) => { const m = V.filter((v, j) => as[j] === i); return m.length ? m.reduce((a, v) => a.map((x, q) => x + v[q] / m.length), Array(12).fill(0)) : c; });
+  }
+  const ms = [0, 1, 2].sort((a, b) => (cen[b][6] - cen[b][2]) - (cen[a][6] - cen[a][2]))[0];
+  const rest = [0, 1, 2].filter(i => i !== ms).sort((a, b) => (cen[b][3] + cen[b][7]) - (cen[a][3] + cen[a][7]));
+  parties = [[ms, 'Main Street League', '#d4a63a'], [rest[0], 'Civic Progress Alliance', '#2a9aa3'], [rest[1], 'Union Labor Ticket', '#c4482f']]
+    .map(f => { usedNames.add(f[1]); return { id: ++G.pid, name: f[1], col: f[2], v: cen[f[0]], born: 0, agenda: [] }; });
+  A.forEach((c, j) => { c.party = parties.reduce((b, p) => dist(V[j], p.v) < dist(V[j], b.v) ? p : b).id; });
+  parties.forEach(platform);
+  glog(`Three parties open their doors: the ${parties.map(p => `${p.name} (${p.n} members, for ${pdesc(p)})`).join(', the ')}.`, 'gov');
+}
+
+function formCoalition() {
+  const live = council.filter(c => byId.has(c.id)), seats = p => live.filter(c => c.party === p.id).length;
+  const ps = parties.filter(p => seats(p) > 0).sort((a, b) => seats(b) - seats(a)), co = [];
+  let n = 0;
+  if (ps.length) {
+    co.push(ps[0]); n = seats(ps[0]);
+    const rest = ps.slice(1);
+    while (n < 7 && rest.length) { rest.sort((a, b) => dist(a.v, co[0].v) - dist(b.v, co[0].v)); const p = rest.shift(); co.push(p); n += seats(p); }
+  }
+  return { co, n };
+}
+function coalitionCheck() {
+  if (!council.length) return;
+  const live = council.filter(c => byId.has(c.id)), seats = p => live.filter(c => c.party === p.id).length;
+  const n = coalition.reduce((s, p) => s + (parties.includes(p) ? seats(p) : 0), 0);
+  const drift = coalition.length > 1 && coalition.some(p => dist(p.v, coalition[0].v) > .3);
+  if (coalition.length && n >= 7 && !drift && coalition.every(p => parties.includes(p))) return;
+  const key = co => co.map(p => p.id).sort().join(), old = coalition.map(p => p.name).join(' with the '), was = key(coalition);
+  const f = formCoalition(); coalition = f.co;
+  if (key(coalition) !== was) {
+    const now = coalition.map(p => p.name).join(' with the ');
+    glog(`${old ? `The coalition of the ${old} collapses. ` : ''}${now ? `New governing coalition: the ${now}, ${f.n} of 12 seats.` : 'No party can govern.'}`, 'gov');
+    pop(hallB(), 'NEW COALITION', '#e0b64a', -10);
+  }
+}
+
+// Every day: blame and credit, members drifting between parties, movements, splits, mergers and dissolutions
+function partyLife() {
+  const A = adults(), hb = hallB();
+  parties.forEach(platform);
+  for (const c of A) {
+    const hard = (c.mood < 40) + (c.w < 5) + (!c.job) + G.broke * 2;
+    for (const p of coalition) c.trust[p.id] = (c.trust[p.id] || 0) - .015 - .05 * hard - c.anger * .06;
+  }
+  for (const c of A) {
+    if (c.civ < .3 && !c.seat) { if (c.party && Math.random() < .02) c.party = 0; continue; }
+    const pv = pvec(c), sc = p => -wdist(pv, p.v) * 3 + (c.trust[p.id] || 0) * .8 - (p.n || 0) / A.length * 2.5 - (coalition.includes(p) ? c.anger * .6 : 0);
+    let best = null, bs = -9;
+    for (const p of parties) { const s = sc(p); if (s > bs) { bs = s; best = p; } }
+    const cur = party(c.party), cs = cur ? sc(cur) : -9;
+    if (best && best !== cur && bs > -.75 && bs > cs + .25 && Math.random() < .25) { note(c, cur ? `left the ${cur.name} for the ${best.name}` : `joined the ${best.name}`); c.party = best.id; }
+    else if (cur && cs < -1.1 && !c.seat && Math.random() < .2) { note(c, `quit the ${cur.name}, disillusioned`); c.party = 0; }
+  }
+  // the politically homeless, especially angry ones, start movements
+  const home = A.filter(c => !c.party && c.civ + c.anger * .4 > .45);
+  if (home.length >= 6 && Math.random() < .3) {
+    const seed = pick(home), sv = pvec(seed), grp = home.filter(c => dist(pvec(c), sv) < .2);
+    if (grp.length >= 5 && !parties.some(p => dist(p.v, sv) < .15)) {
+      const p = { id: ++G.pid, name: newName(sv), col: freeCol(), v: sv, born: G.day, agenda: [] };
+      parties.push(p); grp.forEach(c => c.party = p.id); platform(p);
+      glog(`New party: ${nm(seed)} and ${grp.length - 1} neighbors found the ${p.name}, standing for ${pdesc(p)}`, 'gov'); pop(hb, 'NEW PARTY', '#e0b64a', -20);
+    }
+  }
+  for (const p of [...parties]) {
+    const ms = A.filter(c => c.party === p.id); if (ms.length < 12) continue;
+    const ds = ms.map(c => dist(pvec(c), p.v)), md = ds.reduce((a, b) => a + b, 0) / ds.length, dis = ms.filter((c, k) => !c.seat && ds[k] > md + .07);
+    if (dis.length >= 6 && Math.random() < .06) {
+      const v = dis.map(pvec).reduce((a, x) => a.map((y, i) => y + x[i] / dis.length), Array(12).fill(0));
+      const np = { id: ++G.pid, name: newName(v), col: freeCol(), v, born: G.day, agenda: [] };
+      parties.push(np); dis.forEach(c => c.party = np.id); platform(np);
+      glog(`Party split: ${dis.length} members walk out of the ${p.name} to form the ${np.name}`, 'gov'); pop(hb, 'PARTY SPLIT', '#e0b64a', -20);
+    }
+  }
+  for (const a of parties) for (const b of parties) {
+    if (a !== b && !a.gone && !b.gone && dist(a.v, b.v) < .09 && (a.n || 0) >= (b.n || 0) && (b.n || 0) < 10 && Math.random() < .3) {
+      C.forEach(c => { if (c.party === b.id) c.party = a.id; }); b.gone = 1; glog(`Merger: the ${b.name} folds into the ${a.name}`, 'gov');
+    }
+  }
+  for (const p of parties) {
+    platform(p);
+    const seats = council.filter(c => c.party === p.id && byId.has(c.id)).length;
+    if (!p.gone && p.n < 3 && !seats && G.day - (p.born || 0) > 10) { p.gone = 1; C.forEach(c => { if (c.party === p.id) c.party = 0; }); glog(`The ${p.name} dissolves for lack of members`, 'gov'); }
+  }
+  parties = parties.filter(p => !p.gone);
+  // each party's agenda: what its members most want done
+  for (const p of parties) {
+    const tally = new Map();
+    for (const c of A.filter(c => c.party === p.id).sort(() => Math.random() - .5).slice(0, 10)) {
+      const b = ideas(c); if (!b) continue;
+      const k = tk(b), e = tally.get(k) || { b, n: 0 }; e.n++; tally.set(k, e);
+    }
+    p.agenda = [...tally.values()].sort((a, b) => b.n - a.n).slice(0, 3).map(e => e.b);
+  }
+  coalitionCheck();
+}
+
+// ---------------------------------------------------------------- elections
+function election(first) {
+  const A = adults().filter(c => c.jail <= 0);
+  if (A.length < 12) return;
+  let voters = A.filter(c => c.voted === G.day);
+  const turnout = first ? 1 : voters.length / A.length;
+  if (first || voters.length < 12) voters = A;
+  const rank = (a, b) => (b.civ + (b.seat ? .3 : 0) + (b.want && b.want.k === 'office' ? .3 : 0) + Math.random() * .2) - (a.civ + (a.seat ? .3 : 0) + (a.want && a.want.k === 'office' ? .3 : 0) + Math.random() * .2);
+  const cands = [...parties.flatMap(p => A.filter(c => c.party === p.id).sort(rank).slice(0, 6)), ...A.filter(c => !c.party && c.civ > .6).sort(rank).slice(0, 6)];
+  if (cands.length < 12) cands.push(...A.filter(c => !cands.includes(c)).sort(rank).slice(0, 12 - cands.length));
+  const cvs = cands.map(pvec), votes = new Map(cands.map(c => [c, []]));
+  for (const v of voters) {
+    const pv = pvec(v);
+    let best = cands[0], bs = -1e9;
+    cands.forEach((c, k) => {
+      const s = -wdist(pv, cvs[k]) * 3 + (v.trust[c.party] || 0) * .6 + (c.seat ? (v.trust['m' + c.id] || 0) * .5 + (v.trust.inc || 0) * .2 : 0)
+        + (inCoal(c) ? -v.anger * 1.2 : v.anger * .3) + (v.fr.includes(c.id) ? .3 : 0) + gs() * .15 + (c === v ? 2 : 0);
+      if (s > bs) { bs = s; best = c; }
+    });
+    votes.get(best).push(v.id);
+  }
+  // seats shared out in proportion to each party's vote (D'Hondt), best-supported candidates first
+  const lists = new Map();
+  for (const [c, vs] of votes) { const k = c.party || 'i' + c.id; if (!lists.has(k)) lists.set(k, { tot: 0, cs: [] }); const L = lists.get(k); L.tot += vs.length; L.cs.push(c); }
+  for (const L of lists.values()) L.cs.sort((a, b) => votes.get(b).length - votes.get(a).length);
+  const win = [], got = new Map();
+  for (let q = 0; q < 12; q++) {
+    let bk = null, bq = -1;
+    for (const [k, L] of lists) { const g = got.get(k) || 0; if (g >= L.cs.length) continue; const qq = L.tot / (g + 1); if (qq > bq) { bq = qq; bk = k; } }
+    if (bk == null) break;
+    const g = got.get(bk) || 0; win.push(lists.get(bk).cs[g]); got.set(bk, g + 1);
+  }
+  const lost = council.filter(c => byId.has(c.id) && !win.includes(c));
+  lost.forEach(c => { c.rep = cl(c.rep + .15, 0, 1); note(c, 'lost re-election and resolves to listen to voters more'); });
+  council.forEach(c => c.seat = false);
+  win.forEach(c => { c.seat = true; c.cons = votes.get(c); if (c.want && c.want.k === 'office') achieve(c); });
+  for (const c of win) {
+    const pv = pvec(c), cur = party(c.party);
+    if (cur && dist(pv, cur.v) < .32) continue;
+    let best = null, bd = .28;
+    for (const p of parties) { const d = dist(pv, p.v); if (d < bd) { bd = d; best = p; } }
+    if (best) { if (cur !== best) glog(`${nm(c)} joins the ${best.name}`, 'gov'); c.party = best.id; }
+    else { const p = { id: ++G.pid, name: newName(pv), col: freeCol(), v: pv, born: G.day, agenda: [] }; parties.push(p); c.party = p.id; glog(`${nm(c)} founds the ${p.name}, standing for ${pdesc(p)}`, 'gov'); }
+  }
+  parties.forEach(platform); parties = parties.filter(p => p.n > 0);
+  council = win; M.turn = M.turn * .5 + turnout * .5;
+  const f = formCoalition(); coalition = f.co;
+  const seats = p => win.filter(c => c.party === p.id).length, ps = parties.filter(p => seats(p) > 0).sort((a, b) => seats(b) - seats(a));
+  pop(hallB(), first ? 'FIRST COUNCIL' : 'ELECTION RESULTS', '#e0b64a', -10);
+  glog(`${first ? 'First council elected' : 'Election results'}: ${ps.map(p => `${p.name} ${seats(p)}`).join(', ')}. Governing coalition: the ${coalition.map(p => p.name).join(' with the ')}, ${f.n} of 12 seats. Turnout ${pct(turnout)}.`, 'gov');
+  paintCouncil();
+}
+
+// ---------------------------------------------------------------- council sessions
+function memberU(m, b) {                                                     // members blend their own view with their voters'
+  const cs = (m.cons || []).map(i => byId.get(i)).filter(Boolean).slice(0, 15), own = billU(m, b);
+  const p = party(m.party), agenda = p && p.agenda && p.agenda.some(x => tk(x) === tk(b)) ? .06 : 0;
+  if (!cs.length) return own + agenda;
+  return own * (1 - m.rep) + cs.reduce((s, c) => s + billU(c, b), 0) / cs.length * m.rep + agenda;
+}
+const support = b => { const A = adults(); return A.length ? A.filter(c => billU(c, b) > .04).length / A.length : 0; };
+
+function session() {
+  const live = council.filter(c => byId.has(c.id));
+  if (!live.length) return;
+  const bills = [], hb = hallB();
+  for (const m of live) {
+    const cand = [], p = party(m.party);
+    for (let k = 0; k < 3; k++) { const id = ideas(m); if (id) cand.push(id); }
+    if (p && p.agenda) cand.push(...p.agenda.filter(b => b.kind === 'set' || b.kind === 'enact' || laws.includes(b.law)).map(b => ({ ...b })));
+    let best = null;
+    for (const b of cand) { b.u = memberU(m, b); if (!best || b.u > best.u) best = b; }
+    if (best && best.u > .08 && !bills.some(x => tk(x) === tk(best))) bills.push({ ...best, spon: m, src: 'council' });
+  }
+  bills.sort((a, b) => b.u - a.u); bills.length = Math.min(bills.length, 5);
+  for (const p of docket) {
+    if ((p.kind === 'repeal' || p.kind === 'amend') && !laws.includes(p.law)) { p.dead = 1; continue; }
+    p.sup = support(p);
+    if (p.sup >= .8) { bills.push({ ...p, src: 'petition' }); p.dead = 1; glog(`Petition to ${desc(p)} reaches the council floor with ${pct(p.sup)} support`, 'gov'); }
+    else if (G.day - p.day > 12) { p.dead = 1; p.spon.civ = cl(p.spon.civ - .02, 0, 1); petHist.unshift({ day: G.day, t: `Petition to ${desc(p)} lapsed with ${pct(p.sup)} support. Started by ${nm(p.spon)}.` }); }
+  }
+  docket = docket.filter(p => !p.dead);
+  const att = live.filter(c => c.att === G.day).length;
+  if (!bills.length) { glog(`Council sits (${att} of ${live.length} present) with nothing on the floor.`, 'gov'); M.act *= .7; paintDocket(); paintCouncil(); return; }
+  bills.forEach((b, i) => {
+    if ((b.kind === 'repeal' || b.kind === 'amend') && !laws.includes(b.law)) return;
+    let y = 0, n = 0;
+    for (const m of live) {
+      let s = memberU(m, b);
+      if (b.src === 'petition') s += .08;
+      else if (b.spon.party === m.party) s += .1 * m.loy;
+      else if (inCoal(b.spon) && inCoal(m)) s += .05 * m.loy;
+      else s -= .04 * m.loy;
+      m.lastVote = s > 0; if (s > 0) y++; else n++;
+    }
+    const pass = y >= 7, tally = `${y} to ${n}`, by = b.src === 'petition' ? `citizen petition led by ${nm(b.spon)}` : `${nm(b.spon)} (${pname(b.spon)})`;
+    if (pass) {
+      if (b.kind === 'set') { setLaw(b.key, b.val); lawHist.unshift({ day: G.day, t: `Budget: ${LN[b.key].toLowerCase()} set to ${fmt(b.key, b.val)}, ${tally}. Sponsor: ${by}.` }); }
+      else if (b.kind === 'enact') {
+        const ex = laws.find(l => l.type === b.nl.type && (l.tgt || null) === (b.nl.tgt || null));
+        if (ex) Object.assign(ex, { val: b.nl.val, by, day: G.day, tally }); else laws.push({ ...b.nl, id: ++G.lid, by, day: G.day, tally });
+        lawHist.unshift({ day: G.day, t: `Enacted: the ${lname(b.nl)}, ${tally}. Sponsor: ${by}.` });
+      } else if (b.kind === 'repeal') { laws = laws.filter(l => l !== b.law); lawHist.unshift({ day: G.day, t: `Repealed: the ${lname(b.law)}, ${tally}. Sponsor: ${by}.` }); }
+      else { lawHist.unshift({ day: G.day, t: `Amended: the ${lname(b.law)} became the ${lname(b.nl)}, ${tally}. Sponsor: ${by}.` }); Object.assign(b.law, { val: b.nl.val, by, day: G.day, tally }); }
+      for (const c of adults()) {                                            // every citizen learns who did this to them
+        const u = cl(billU(c, b), -1, 1);
+        if (b.src === 'petition') c.trust.inc = (c.trust.inc || 0) + u * .05;
+        else { c.trust[b.spon.party] = (c.trust[b.spon.party] || 0) + u * .2; c.trust['m' + b.spon.id] = (c.trust['m' + b.spon.id] || 0) + u * .3; c.trust.inc = (c.trust.inc || 0) + u * .08; }
+        if (u < -.25) c.anger = Math.min(1, c.anger + .08);
+      }
+    }
+    if (b.src === 'petition') petHist.unshift({ day: G.day, t: `Petition to ${desc(b)} ${pass ? 'passed' : 'failed'} in council, ${tally}. Led by ${nm(b.spon)}.` });
+    for (const m of live) {
+      if (b.src !== 'petition' && m.party === b.spon.party && !m.lastVote) m.loy = Math.max(0, m.loy - .04);
+      else if (m.lastVote === pass) m.loy = Math.min(1, m.loy + .02);
+    }
+    pop(hb, pass ? 'BILL PASSED' : 'BILL FAILS', pass ? '#9fe0a0' : '#ff6f5a', i * 12);
+    glog(`Council ${pass ? 'passes' : 'rejects'} the bill to ${desc(b)}, ${tally}. Sponsor: ${by}.${fisTxt(b)}`, 'gov');
+    b.spon.civ = cl(b.spon.civ + (pass ? .04 : -.02), 0, 1);
+  });
+  M.act = M.act * .6 + bills.length * .4;
+  if (petHist.length > 200) petHist.length = 200;
+  if (lawHist.length > 300) lawHist.length = 300;
+  paintDocket(); paintBook(); paintCouncil();
+}
+
+// ---------------------------------------------------------------- scoring and the town pulse
+function govTrust(c) { if (!coalition.length) return .5; const t = coalition.reduce((s, p) => s + (c.trust[p.id] || 0), 0) / coalition.length; return 1 / (1 + Math.exp(-t * 2)); }
+function calc() {
+  const A = adults(), n = A.length || 1, emp = A.filter(c => c.job).length / n, ws = A.map(c => c.w).sort((a, b) => a - b), med = ws[n >> 1] || 0, sum = ws.reduce((a, b) => a + b, 0) || 1;
+  let gini = 0; ws.forEach((w, i) => gini += (2 * (i + 1) - n - 1) * w); gini /= n * sum;
+  const poor = A.filter(c => c.w < 5).length / n, emps = A.filter(c => c.job), aw = emps.length ? emps.reduce((s, c) => s + wageAt(c, c.job), 0) / emps.length : 0;
+  const kinds = new Set(emps.map(c => c.job.t)).size, fr = A.reduce((s, c) => s + fa(c).length, 0) / n, mood = A.reduce((s, c) => s + c.mood, 0) / n / 100;
+  const leis = A.reduce((s, c) => s + ['cinema', 'park', 'diner', 'bar', 'club', 'drivein'].reduce((x, v) => x + (c.vis[v] || 0), 0), 0) / n;
+  let sat = 0, ni = 0;
+  for (const c of A) {
+    for (const k in LAWS) { sat += 1 - cl(Math.abs(ideal(c, k) - P[k]) / (LAWS[k].hi - LAWS[k].lo) * 2, 0, 1); ni++; }
+    for (const l of laws) { sat += cl(.5 + ben(c, l) * .5, 0, 1); ni++; }
+  }
+  sat = ni ? sat / ni : 0;
+  let use = 0, nc = 0; A.forEach(c => { MODES.forEach(m => use += c.use[m]); nc += c.use.car; });
+  const noncar = use ? 1 - nc / use : .5, trust = A.reduce((s, c) => s + govTrust(c), 0) / n;
+  SC.Political = 30 * sat + 25 * cl(M.turn / .6, 0, 1) + 20 * cl(M.act / 3, 0, 1) + 25 * trust;
+  SC.Economic = 30 * cl(med / 60, 0, 1) + 15 * cl((G.tre + 50) / 250, 0, 1) + 20 * (1 - cl(gini, 0, 1)) + 20 * (1 - poor) + 15 * cl(M.sales / n / 6, 0, 1);
+  SC.Work = 60 * emp + 25 * cl(aw / 14, 0, 1) + 15 * kinds / JK.length;
+  SC.Social = 30 * cl(fr / 4, 0, 1) + 30 * mood + 25 * (1 - cl(M.crime * 8, 0, 1)) + 15 * cl(leis / 4, 0, 1);
+  SC.Transit = 45 * cl(1 - (M.tripH - .6) / 2.4, 0, 1) + 25 * (1 - cong / 2) + 15 * cl(noncar / .5, 0, 1) + 15 * (1 - cl(M.cost / 2.5, 0, 1));
+  SC.Overall = (SC.Political + SC.Economic + SC.Work + SC.Social + SC.Transit) / 5;
+  for (const k in SC) { (hist[k] = hist[k] || []).push(SC[k]); if (hist[k].length > 40) hist[k].shift(); }
+}
+function recordPulse() {
+  const A = adults(), n = A.length || 1, ws = A.map(c => c.w).sort((a, b) => a - b);
+  pulse.push({ d: G.day, mood: A.reduce((s, c) => s + c.mood, 0) / n, wealth: ws[n >> 1] || 0, health: A.reduce((s, c) => s + c.hp, 0) / n * 10, trust: A.reduce((s, c) => s + govTrust(c), 0) / n * 100 });
+  if (pulse.length > 60) pulse.shift();
+}
+
+/* =============================================================================
+   4  VIEW: the town art (drawn once to an offscreen canvas)
+   ============================================================================= */
+const cv = $('cv'), ctx = cv.getContext('2d'), OFF = document.createElement('canvas');
+OFF.width = W * 2; OFF.height = H * 2;
+const WINS = [], NEON = [], STACKS = [];
+const CARC = ['#7fc4bf', '#e98fa8', '#f2e8cf', '#c4482f', '#9ab3e6', '#f2c14e', '#3d5a6a'];
+const GOLD = '#d4a63a';
+
+const rr = (g, x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
+const shadow = (o, x, y, w, h) => { o.fillStyle = 'rgba(0,0,0,.38)'; o.fillRect(x + 7, y + 7, w, h); };
+const disc = (o, x, y, r, c) => { o.fillStyle = c; o.beginPath(); o.arc(x, y, r, 0, 7); o.fill(); };
+function tiers(o, x, y, w, h, cols, st, rad) {                               // stepped art deco setbacks
+  cols.forEach((c, k) => { const a = x + k * st, b = y + k * st; o.fillStyle = c; rr(o, a, b, w - 2 * k * st, h - 2 * k * st, rad || 0); o.fill(); o.strokeStyle = GOLD; o.lineWidth = 1; o.stroke(); });
+}
+function fan(o, cx, cy, r, n, col) {                                         // sunburst
+  o.strokeStyle = col; o.lineWidth = 1.2;
+  for (let k = 0; k < n; k++) { const a = Math.PI * 2 * k / n; o.beginPath(); o.moveTo(cx, cy); o.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); o.stroke(); }
+}
+function win(o, x, y, w, h) { o.fillStyle = '#2b3a44'; o.fillRect(x, y, w, h); if (Math.random() < .65) WINS.push([x, y, w, h]); }
+function wrow(o, x, y, n, dx, w, h) { for (let k = 0; k < n; k++) win(o, x + k * dx, y, w, h); }
+function sign(o, x, y, t, col) {
+  o.font = '600 9px "Josefin Sans",sans-serif'; const w = o.measureText(t).width + 10;
+  o.fillStyle = '#1d2224'; o.fillRect(x - w / 2, y - 8, w, 12); o.strokeStyle = GOLD; o.lineWidth = .8; o.strokeRect(x - w / 2, y - 8, w, 12);
+  o.fillStyle = col; o.textAlign = 'center'; o.fillText(t, x, y + 1); NEON.push([x, y, t, col]);
+}
+function tree(o, x, y, r) { disc(o, x + 2, y + 2, r, 'rgba(0,0,0,.3)'); disc(o, x, y, r, '#2f7a3a'); disc(o, x - r * .3, y - r * .3, r * .5, '#4a9a52'); }
+function edgeTrees(o, b) { for (let k = 12; k < 150; k += 34) { tree(o, b.x0 + k, b.y0 + 5, 5); tree(o, b.x0 + k, b.y0 + 145, 5); } }
+function parked(o, x, y, a, col, isBus) { o.save(); o.translate(x, y); o.rotate(a); isBus ? drawBus(o) : drawCar(o, col); o.restore(); }
+function lot(o, x, y, w, h) {
+  o.fillStyle = '#4f535a'; o.fillRect(x, y, w, h); o.strokeStyle = '#e9e4d2'; o.lineWidth = .8;
+  for (let k = x + 18; k < x + w; k += 18) { o.beginPath(); o.moveTo(k, y); o.lineTo(k, y + 10); o.stroke(); }
+}
+
+function drawBlock(o, b) {
+  const x = b.x0, y = b.y0, t = b.t, s = b.sty;
+  const base = c => { o.fillStyle = c; o.fillRect(x, y, 150, 150); };
+  const lab = n => {
+    o.font = '600 10px "Josefin Sans",sans-serif'; o.textAlign = 'center'; const w = o.measureText(n).width + 10;
+    o.fillStyle = '#1d2224'; o.fillRect(x + 75 - w / 2, y + 138, w, 12); o.fillStyle = '#e0b64a'; o.fillText(n, x + 75, y + 147.5);
+  };
+  switch (t) {
+    case 'home':
+      base('#6f9a5a'); edgeTrees(o, b);
+      if (s === 'bungalow') {
+        const cols = ['#b9e0c9', '#f4c7a1', '#f6e3a1', '#b7d4ee'];
+        for (let k = 0; k < 4; k++) {
+          const hx = x + 12 + (k % 2) * 72, hy = y + 14 + (k >> 1) * 62;
+          o.strokeStyle = '#f4f1e6'; o.setLineDash([2, 2]); o.lineWidth = 1; o.strokeRect(hx - 5, hy - 5, 64, 56); o.setLineDash([]);
+          shadow(o, hx, hy, 54, 44); o.fillStyle = cols[(b.id + k) % 4]; o.fillRect(hx, hy, 54, 44);
+          o.fillStyle = 'rgba(0,0,0,.16)'; o.beginPath(); o.moveTo(hx + 54, hy); o.lineTo(hx + 40, hy + 22); o.lineTo(hx + 54, hy + 44); o.lineTo(hx, hy + 44); o.lineTo(hx + 14, hy + 22); o.lineTo(hx + 40, hy + 22); o.fill();
+          o.strokeStyle = '#8a5a2b'; o.lineWidth = 1.2; o.beginPath(); o.moveTo(hx, hy); o.lineTo(hx + 14, hy + 22); o.lineTo(hx + 40, hy + 22); o.lineTo(hx + 54, hy);
+          o.moveTo(hx + 14, hy + 22); o.lineTo(hx, hy + 44); o.moveTo(hx + 40, hy + 22); o.lineTo(hx + 54, hy + 44); o.stroke();
+          o.fillStyle = '#6b4a36'; o.fillRect(hx + 40, hy + 6, 6, 6); win(o, hx + 6, hy + 41, 7, 3); win(o, hx + 40, hy + 41, 7, 3); disc(o, hx + 60, hy + 44, 3, '#e98fa8');
+        }
+        lab('Bungalows');
+      } else if (s === 'victorian') {
+        const cols = ['#8e3b46', '#5f7a63', '#9c7a3a'];
+        for (let k = 0; k < 2; k++) {
+          const hx = x + 12 + k * 70, hy = y + 14;
+          shadow(o, hx, hy, 58, 80); o.fillStyle = cols[(b.id + k) % 3]; o.fillRect(hx, hy, 58, 80);
+          o.fillStyle = 'rgba(0,0,0,.2)'; o.fillRect(hx + 29, hy, 29, 80); o.strokeStyle = '#f2e8cf'; o.lineWidth = 1.5; o.strokeRect(hx + .5, hy + .5, 57, 79);
+          o.beginPath(); o.moveTo(hx + 29, hy); o.lineTo(hx + 29, hy + 80); o.stroke();
+          disc(o, hx + 50, hy + 10, 11, '#3d3a44'); fan(o, hx + 50, hy + 10, 11, 8, GOLD); o.fillStyle = '#f2e8cf'; o.fillRect(hx + 4, hy + 80, 50, 8); wrow(o, hx + 6, hy + 76, 4, 13, 6, 3);
+          for (let f = 0; f < 8; f++) disc(o, hx + 6 + f * 6.5, hy + 100, 2.2, ['#e98fa8', '#f2c14e', '#f4f1e6', '#c4482f'][f % 4]);
+        }
+        lab('Victorian Row');
+      } else if (s === 'ranch') {
+        for (const ry of [12, 82]) {
+          shadow(o, x + 10, y + ry, 98, 34); o.fillStyle = ry < 50 ? '#e7d3b0' : '#cfdcc5'; o.fillRect(x + 10, y + ry, 98, 34);
+          o.fillStyle = 'rgba(0,0,0,.15)'; o.fillRect(x + 10, y + ry + 17, 98, 17); o.strokeStyle = '#8a5a2b'; o.beginPath(); o.moveTo(x + 10, y + ry + 17); o.lineTo(x + 108, y + ry + 17); o.stroke();
+          o.fillStyle = '#d6d2c8'; o.fillRect(x + 110, y + ry, 32, 34); parked(o, x + 126, y + ry + 17, Math.PI / 2, CARC[(b.id + ry) % CARC.length]); wrow(o, x + 16, y + ry + 31, 6, 15, 7, 3);
+          o.fillStyle = '#6cc6e0'; o.beginPath(); o.ellipse(x + 52, y + ry + 50, 20, 8, .2, 0, 7); o.fill(); o.strokeStyle = '#f4f1e6'; o.lineWidth = 2; o.stroke();
+        }
+        lab('Ranch Houses');
+      } else {
+        base('#b9b19c'); shadow(o, x + 14, y + 12, 122, 112); tiers(o, x + 14, y + 12, 122, 112, ['#e9b8b0', '#f2dcd0'], 10, 18);
+        o.strokeStyle = '#12565c'; o.lineWidth = 1.5; for (const sy of [36, 46, 56]) { o.beginPath(); o.moveTo(x + 24, y + sy); o.lineTo(x + 126, y + sy); o.stroke(); }
+        disc(o, x + 108, y + 86, 10, '#8a5a3b'); disc(o, x + 108, y + 86, 6, '#6b4630'); o.strokeStyle = GOLD; o.beginPath(); o.arc(x + 108, y + 86, 10, 0, 7); o.stroke();
+        wrow(o, x + 20, y + 16, 8, 14, 8, 3); wrow(o, x + 20, y + 117, 8, 14, 8, 3); lab('Apartments');
+      }
+      break;
+    case 'works':
+      base('#8c8f93'); shadow(o, x + 10, y + 28, 130, 90); o.fillStyle = '#74685f'; o.fillRect(x + 10, y + 28, 130, 90);
+      for (let k = 0; k < 9; k++) { o.fillStyle = k % 2 ? '#497371' : '#5e8c8a'; o.fillRect(x + 12 + k * 14, y + 30, 14, 86); win(o, x + 14 + k * 14, y + 114, 9, 3); }
+      o.strokeStyle = GOLD; o.lineWidth = 1.5; o.strokeRect(x + 10, y + 28, 130, 90);
+      for (const sx of [30, 60]) { disc(o, x + sx, y + 14, 8, '#3a3f45'); o.strokeStyle = GOLD; o.beginPath(); o.arc(x + sx, y + 14, 8, 0, 7); o.stroke(); STACKS.push([x + sx, y + 14]); }
+      o.fillStyle = '#5b4a3a'; for (let k = 0; k < 4; k++) o.fillRect(x + 90 + k * 11, y + 8, 8, 14);
+      lab('The Works'); break;
+    case 'office':
+      base('#9aa0a6'); shadow(o, x + 16, y + 14, 118, 116); tiers(o, x + 16, y + 14, 118, 116, ['#55697a', '#647b8e', '#7690a3', '#89a5b8'], 12);
+      tiers(o, x + 60, y + 58, 30, 28, ['#d4a63a', '#e8c46a'], 5); fan(o, x + 75, y + 72, 24, 16, GOLD);
+      wrow(o, x + 20, y + 18, 10, 11, 7, 3); wrow(o, x + 20, y + 124, 10, 11, 7, 3); sign(o, x + 75, y + 108, 'MUTUAL INSURANCE', '#e0b64a'); lab('Mutual Insurance Co.'); break;
+    case 'depot':
+      base('#5b5f66'); o.fillStyle = '#7d8288'; o.fillRect(x + 8, y + 8, 134, 56);
+      for (let k = 0; k < 12; k++) { o.fillStyle = k % 2 ? '#8d9298' : '#70757b'; o.fillRect(x + 10 + k * 11, y + 10, 11, 52); }
+      o.strokeStyle = GOLD; o.strokeRect(x + 8, y + 8, 134, 56);
+      for (let k = 0; k < 4; k++) { o.strokeStyle = '#e9e4d2'; o.beginPath(); o.moveTo(x + 14 + k * 33, y + 70); o.lineTo(x + 14 + k * 33, y + 132); o.stroke(); if (k < 3) parked(o, x + 30 + k * 33, y + 101, Math.PI / 2, 0, 1); }
+      sign(o, x + 75, y + 36, 'TRANSIT', '#f2c14e'); lab('Bus Depot'); break;
+    case 'police':
+      base('#9aa0a6'); shadow(o, x + 14, y + 14, 122, 78); tiers(o, x + 14, y + 14, 122, 78, ['#3c4f6b', '#4a6080', '#5a7294'], 10);
+      wrow(o, x + 20, y + 88, 9, 13, 8, 3); sign(o, x + 75, y + 52, 'POLICE', '#9ab3e6'); lot(o, x + 14, y + 100, 122, 32);
+      parked(o, x + 40, y + 116, Math.PI / 2, '#1e1e1e'); parked(o, x + 74, y + 116, Math.PI / 2, '#1e1e1e');
+      o.fillStyle = '#ddd'; o.fillRect(x + 128, y + 16, 2, 22); o.fillStyle = '#c4482f'; o.fillRect(x + 118, y + 16, 10, 6); lab('Police Station'); break;
+    case 'diner':
+      base('#b7ae98'); lot(o, x + 8, y + 88, 134, 46); [30, 66, 126].forEach((px, k) => parked(o, x + px, y + 112, Math.PI / 2, CARC[(b.id + k) % CARC.length]));
+      shadow(o, x + 14, y + 12, 96, 62); o.fillStyle = '#cfd6d9'; rr(o, x + 14, y + 12, 96, 62, 16); o.fill(); o.fillStyle = '#12565c'; o.fillRect(x + 14, y + 40, 96, 8);
+      o.fillStyle = '#c4482f'; o.fillRect(x + 14, y + 50, 96, 3); o.strokeStyle = GOLD; rr(o, x + 14, y + 12, 96, 62, 16); o.stroke(); wrow(o, x + 22, y + 66, 7, 12, 8, 4);
+      sign(o, x + 62, y + 28, 'DINER', '#ff6fa3'); tree(o, x + 130, y + 22, 9); tree(o, x + 130, y + 60, 8); lab('Starlite Diner'); break;
+    case 'grocery':
+      base('#c9bfa6'); shadow(o, x + 12, y + 12, 126, 74); o.fillStyle = '#ece2c6'; o.fillRect(x + 12, y + 12, 126, 74); o.fillStyle = '#4e8a5a'; o.fillRect(x + 12, y + 12, 126, 30);
+      for (let k = 0; k < 14; k++) { o.fillStyle = k % 2 ? '#f2e8cf' : '#3f7a4a'; o.fillRect(x + 12 + k * 9, y + 86, 9, 12); }
+      for (let k = 0; k < 10; k++) { o.fillStyle = '#8a5a3b'; o.fillRect(x + 16 + k * 12, y + 104, 10, 10); disc(o, x + 21 + k * 12, y + 109, 3.5, ['#c4482f', '#f2a03a', '#7fb04a', '#f2c14e'][k % 4]); }
+      sign(o, x + 75, y + 28, 'GROCER', '#9fe0a0'); wrow(o, x + 18, y + 80, 8, 15, 9, 3); lab('Corner Grocery'); break;
+    case 'cinema':
+      base('#b7ae98'); shadow(o, x + 14, y + 10, 122, 96); tiers(o, x + 14, y + 10, 122, 96, ['#3d2a4a', '#5a3d6a', '#7a5a8a'], 10); fan(o, x + 75, y + 58, 30, 20, GOLD);
+      o.fillStyle = '#1d2224'; o.fillRect(x + 22, y + 106, 106, 18); for (let k = x + 24; k < x + 128; k += 6) { disc(o, k, y + 107, 1.2, '#f2c14e'); disc(o, k, y + 123, 1.2, '#f2c14e'); }
+      o.fillStyle = '#f2e8cf'; o.font = '600 8px "Josefin Sans"'; o.textAlign = 'center'; o.fillText('NOW SHOWING', x + 75, y + 118); sign(o, x + 75, y + 30, 'BIJOU', '#f2c14e'); lab('The Bijou'); break;
+    case 'barber':
+      base('#c9bfa6');
+      for (const [bx, col, n2, nc] of [[12, '#3d5a8a', 'BARBER', '#9ab3e6'], [80, '#c86b8a', 'SALON', '#ff9fc4']]) {
+        shadow(o, x + bx, y + 18, 58, 74); o.fillStyle = '#ece2c6'; o.fillRect(x + bx, y + 18, 58, 74); o.fillStyle = col; o.fillRect(x + bx, y + 18, 58, 22);
+        o.strokeStyle = GOLD; o.strokeRect(x + bx, y + 18, 58, 74); sign(o, x + bx + 29, y + 60, n2, nc); wrow(o, x + bx + 6, y + 86, 4, 13, 8, 3);
+      }
+      disc(o, x + 66, y + 100, 5, '#f4f1e6'); o.lineWidth = 1.5; o.strokeStyle = '#c4482f'; o.beginPath(); o.arc(x + 66, y + 100, 3, 0, 4); o.stroke();
+      o.strokeStyle = '#3d5a8a'; o.beginPath(); o.arc(x + 66, y + 100, 3, 3, 6); o.stroke(); tree(o, x + 30, y + 118, 8); tree(o, x + 120, y + 118, 8); lab('Barber and Salon'); break;
+    case 'dept':
+      base('#b7ae98'); shadow(o, x + 10, y + 10, 130, 110); tiers(o, x + 10, y + 10, 130, 110, ['#1f5a5e', '#2a7177', '#3a8a8f'], 12);
+      disc(o, x + 75, y + 65, 16, GOLD); fan(o, x + 75, y + 65, 30, 24, '#e0b64a'); disc(o, x + 75, y + 65, 6, '#f2e8cf');
+      wrow(o, x + 14, y + 14, 11, 11, 7, 3); wrow(o, x + 14, y + 114, 11, 11, 7, 3); sign(o, x + 75, y + 100, 'BRIGHTWELL’S', '#e0b64a'); lab('Brightwell’s'); break;
+    case 'gas':
+      base('#5b5f66'); shadow(o, x + 18, y + 26, 82, 48); o.fillStyle = '#f4f1e6'; o.fillRect(x + 18, y + 26, 82, 48); o.fillStyle = '#c4482f'; o.fillRect(x + 18, y + 26, 82, 6); o.fillRect(x + 18, y + 68, 82, 6);
+      for (let k = 0; k < 3; k++) o.fillRect(x + 30 + k * 25, y + 76, 8, 10);
+      parked(o, x + 60, y + 100, 0, CARC[b.id % CARC.length]); shadow(o, x + 108, y + 14, 34, 74); o.fillStyle = '#e7d3b0'; o.fillRect(x + 108, y + 14, 34, 74);
+      o.strokeStyle = GOLD; o.strokeRect(x + 108, y + 14, 34, 74); sign(o, x + 59, y + 50, 'GAS 23¢', '#ff6f5a'); lab('Esso-Way Gas'); break;
+    case 'bar':
+      base('#b7ae98'); shadow(o, x + 14, y + 18, 122, 80); o.fillStyle = '#7a3b2e'; o.fillRect(x + 14, y + 18, 122, 80);
+      o.strokeStyle = 'rgba(0,0,0,.25)'; o.lineWidth = 1; for (let k = y + 24; k < y + 98; k += 6) { o.beginPath(); o.moveTo(x + 14, k); o.lineTo(x + 136, k); o.stroke(); }
+      o.fillStyle = '#3f2a22'; o.fillRect(x + 14, y + 18, 122, 14); for (let k = 0; k < 12; k++) { o.fillStyle = k % 2 ? '#f2e8cf' : '#2f6a4a'; o.fillRect(x + 16 + k * 10, y + 98, 10, 10); }
+      sign(o, x + 75, y + 60, 'TAVERN', '#f2a03a'); for (let k = 0; k < 3; k++) { disc(o, x + 26 + k * 14, y + 122, 5, '#8a5a3b'); o.strokeStyle = '#4a3020'; o.beginPath(); o.arc(x + 26 + k * 14, y + 122, 5, 0, 7); o.stroke(); }
+      wrow(o, x + 20, y + 92, 8, 14, 8, 3); tree(o, x + 122, y + 122, 8); lab('The Rusty Anchor'); break;
+    case 'club':
+      base('#5b5f66'); shadow(o, x + 12, y + 12, 126, 104); tiers(o, x + 12, y + 12, 126, 104, ['#1d1d2b', '#2c2c45', '#3d3d60'], 10); fan(o, x + 75, y + 55, 28, 20, GOLD); disc(o, x + 75, y + 55, 7, '#e04aa0');
+      o.fillStyle = '#1d2224'; o.fillRect(x + 30, y + 112, 90, 14); for (let k = x + 32; k < x + 120; k += 6) { disc(o, k, y + 113, 1.2, '#ff9fd0'); disc(o, k, y + 125, 1.2, '#ff9fd0'); }
+      sign(o, x + 75, y + 92, 'CLUB 52', '#ff5fb4'); lab('Club Fifty-Two'); break;
+    case 'drivein':
+      base('#4f535a'); shadow(o, x + 15, y + 8, 120, 10); o.fillStyle = '#f4f1e6'; o.fillRect(x + 15, y + 8, 120, 10); o.fillStyle = '#8a8f95'; o.fillRect(x + 60, y + 18, 30, 6);
+      for (const ry of [46, 80, 114]) for (let k = 0; k < 5; k++) if ((k + ry) % 3) parked(o, x + 23 + k * 26, y + ry, -Math.PI / 2, CARC[(k + ry) % CARC.length]);
+      sign(o, x + 75, y + 32, 'DRIVE-IN', '#ff6f5a'); lab('Starlight Drive-In'); break;
+    case 'drugstore':
+      base('#c9bfa6'); shadow(o, x + 12, y + 14, 126, 84); o.fillStyle = '#ece2c6'; o.fillRect(x + 12, y + 14, 126, 84); o.fillStyle = '#3d5a8a'; o.fillRect(x + 12, y + 14, 126, 26);
+      for (let k = 0; k < 14; k++) { o.fillStyle = k % 2 ? '#f4f1e6' : '#c4482f'; o.fillRect(x + 12 + k * 9, y + 98, 9, 10); }
+      for (let k = 0; k < 6; k++) { disc(o, x + 30 + k * 18, y + 121, 4, '#c4482f'); disc(o, x + 30 + k * 18, y + 121, 2, '#cfd6d9'); }
+      sign(o, x + 75, y + 30, 'DRUGS & SODA', '#9ab3e6'); wrow(o, x + 18, y + 92, 8, 15, 9, 3); lab('Main Street Drugs'); break;
+    case 'bakery':
+      base('#c9bfa6'); tree(o, x + 134, y + 24, 9); tree(o, x + 134, y + 64, 8); shadow(o, x + 14, y + 16, 104, 82); o.fillStyle = '#f0c9b8'; o.fillRect(x + 14, y + 16, 104, 82);
+      o.fillStyle = 'rgba(0,0,0,.12)'; o.fillRect(x + 66, y + 16, 52, 82); o.strokeStyle = GOLD; o.strokeRect(x + 14, y + 16, 104, 82);
+      for (let k = 0; k < 12; k++) { o.fillStyle = k % 2 ? '#f4f1e6' : '#e98fa8'; o.fillRect(x + 14 + k * 8.7, y + 98, 8.7, 10); }
+      for (let k = 0; k < 7; k++) { o.fillStyle = '#c99a56'; o.beginPath(); o.ellipse(x + 24 + k * 14, y + 121, 5, 3, 0, 0, 7); o.fill(); }
+      sign(o, x + 66, y + 50, 'BAKERY', '#ffcf7a'); lab('Hartley’s Bakery'); break;
+    case 'mill':
+      base('#8a7a5a'); shadow(o, x + 10, y + 12, 90, 64); o.fillStyle = '#7a5a3a'; o.fillRect(x + 10, y + 12, 90, 64);
+      o.strokeStyle = 'rgba(0,0,0,.3)'; o.lineWidth = 1; for (let k = x + 16; k < x + 100; k += 7) { o.beginPath(); o.moveTo(k, y + 12); o.lineTo(k, y + 76); o.stroke(); }
+      o.strokeStyle = GOLD; o.strokeRect(x + 10, y + 12, 90, 64);
+      for (let r = 0; r < 3; r++) for (let k = 0; k < 4; k++) { const lx = x + 114 + (k % 2) * 14, ly = y + 20 + r * 22 + (k >> 1) * 9; disc(o, lx, ly, 4.5, '#b08050'); disc(o, lx, ly, 2, '#e0c08a'); }
+      o.fillStyle = '#5b4a3a'; o.fillRect(x + 20, y + 92, 110, 8); for (let k = 0; k < 6; k++) { disc(o, x + 24 + k * 20, y + 114, 5, '#b08050'); disc(o, x + 24 + k * 20, y + 114, 2, '#e0c08a'); }
+      disc(o, x + 86, y + 24, 6, '#3a3f45'); STACKS.push([x + 86, y + 24]); wrow(o, x + 16, y + 72, 6, 14, 8, 3); lab('Lumber Mill'); break;
+    case 'cannery':
+      base('#8c8f93'); shadow(o, x + 10, y + 22, 128, 80); o.fillStyle = '#5e7a80'; o.fillRect(x + 10, y + 22, 128, 80); for (let k = 0; k < 5; k++) disc(o, x + 26 + k * 24, y + 50, 6, '#8fa5aa');
+      o.strokeStyle = GOLD; o.lineWidth = 1; o.strokeRect(x + 10, y + 22, 128, 80); disc(o, x + 124, y + 12, 10, '#a0522d'); o.strokeStyle = '#5b2a1a'; o.beginPath(); o.arc(x + 124, y + 12, 10, 0, 7); o.stroke();
+      disc(o, x + 30, y + 30, 5, '#3a3f45'); STACKS.push([x + 30, y + 30]); sign(o, x + 75, y + 80, 'CANNERY', '#9fe0a0'); lot(o, x + 10, y + 106, 128, 28);
+      parked(o, x + 50, y + 121, 0, '#c4482f'); parked(o, x + 100, y + 121, 0, '#f2e8cf'); wrow(o, x + 16, y + 96, 9, 14, 8, 3); lab('Hollowbrook Cannery'); break;
+    case 'park':
+      base('#5d9a55'); edgeTrees(o, b);
+      if (s === 'ball') {
+        o.fillStyle = '#b9875a'; o.beginPath(); o.moveTo(x + 75, y + 124); o.lineTo(x + 115, y + 84); o.lineTo(x + 75, y + 44); o.lineTo(x + 35, y + 84); o.fill();
+        o.fillStyle = '#5d9a55'; o.beginPath(); o.moveTo(x + 75, y + 112); o.lineTo(x + 103, y + 84); o.lineTo(x + 75, y + 56); o.lineTo(x + 47, y + 84); o.fill();
+        o.fillStyle = '#fff'; for (const [a, c] of [[75, 124], [115, 84], [75, 44], [35, 84]]) o.fillRect(x + a - 2, y + c - 2, 4, 4);
+        disc(o, x + 75, y + 86, 4, '#b9875a'); o.fillStyle = '#9aa0a6'; o.fillRect(x + 12, y + 14, 40, 14); o.fillRect(x + 98, y + 14, 40, 14); lab('Ball Field');
+      } else {
+        o.fillStyle = '#e8dcb8'; o.fillRect(x + 66, y, 18, 150); o.fillRect(x, y + 66, 150, 18);
+        disc(o, x + 75, y + 75, 26, '#4f9ac8'); disc(o, x + 75, y + 75, 18, '#7fc0de'); fan(o, x + 75, y + 75, 26, 16, GOLD); disc(o, x + 75, y + 75, 5, GOLD);
+        for (let k = 0; k < 10; k++) { const tx = x + 20 + ((k * 53 + b.id * 17) % 110), ty = y + 20 + ((k * 37 + b.id * 29) % 100); if (Math.abs(tx - x - 75) < 34 && Math.abs(ty - y - 75) < 34 || Math.abs(tx - x - 75) < 14 || Math.abs(ty - y - 75) < 14) continue; tree(o, tx, ty, 9); }
+        lab('Memorial Park');
+      }
+      break;
+    case 'hall':
+      base('#d9d2bb'); shadow(o, x + 14, y + 14, 122, 118); tiers(o, x + 14, y + 14, 122, 118, ['#efe7cf', '#e2d6b0', '#d4c595', '#c7b57a'], 14);
+      disc(o, x + 75, y + 73, 18, GOLD); fan(o, x + 75, y + 73, 34, 24, '#a8791a'); disc(o, x + 75, y + 73, 8, '#f2e8cf'); wrow(o, x + 20, y + 18, 9, 13, 8, 3); lab('Town Hall'); break;
+    case 'court':
+      base('#d9d2bb'); shadow(o, x + 12, y + 14, 126, 108); tiers(o, x + 12, y + 14, 126, 108, ['#e8e3d3', '#d9d2bd', '#cabfa0'], 12);
+      for (let k = 0; k < 7; k++) disc(o, x + 24 + k * 17, y + 116, 3.5, '#8a7a55');
+      o.fillStyle = GOLD; o.beginPath(); o.moveTo(x + 36, y + 50); o.lineTo(x + 114, y + 50); o.lineTo(x + 75, y + 34); o.fill(); wrow(o, x + 18, y + 18, 9, 13, 8, 3); lab('Courthouse'); break;
+    default:   // jail
+      base('#6d737c'); shadow(o, x + 12, y + 14, 126, 108); tiers(o, x + 12, y + 14, 126, 108, ['#4a5059', '#3d434b', '#2f343b'], 12);
+      o.strokeStyle = '#8b94a0'; o.lineWidth = 1; for (let k = 0; k < 9; k++) { o.beginPath(); o.moveTo(x + 36 + k * 9, y + 38); o.lineTo(x + 36 + k * 9, y + 98); o.stroke(); }
+      for (const [a, c] of [[12, 14], [138, 14], [12, 122], [138, 122]]) { disc(o, x + a, y + c, 9, '#262a30'); disc(o, x + a, y + c, 2.5, '#e0443a'); }
+      lab('County Jail');
+  }
+}
+
+function buildStatic() {
+  WINS.length = 0; NEON.length = 0; STACKS.length = 0;
+  const o = OFF.getContext('2d');
+  o.setTransform(2, 0, 0, 2, 0, 0); o.fillStyle = '#2a2e35'; o.fillRect(0, 0, W, H);
+  o.fillStyle = 'rgba(255,255,255,.025)'; for (let k = 0; k < 1200; k++) o.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5);
+  o.strokeStyle = '#d9b53c'; o.lineWidth = 1.6; o.setLineDash([12, 10]);
+  for (let j = 0; j <= NY; j++) { o.beginPath(); o.moveTo(0, Y(j)); o.lineTo(W, Y(j)); o.stroke(); }
+  for (let i = 0; i <= NX; i++) { o.beginPath(); o.moveTo(X(i), 0); o.lineTo(X(i), H); o.stroke(); }
+  o.setLineDash([]);
+  for (let i = 0; i <= NX; i++) for (let j = 0; j <= NY; j++) {
+    o.fillStyle = '#2a2e35'; o.fillRect(X(i) - 20, Y(j) - 20, 40, 40); o.fillStyle = '#e9e4d2';
+    for (let k = -14; k <= 14; k += 7) { o.fillRect(X(i) + k - 1.5, Y(j) - 19, 3, 6); o.fillRect(X(i) + k - 1.5, Y(j) + 13, 3, 6); o.fillRect(X(i) - 19, Y(j) + k - 1.5, 6, 3); o.fillRect(X(i) + 13, Y(j) + k - 1.5, 6, 3); }
+  }
+  blocks.forEach(b => {
+    o.fillStyle = '#b7ae98'; o.fillRect(b.x0 - 4, b.y0 - 4, 158, 158); o.fillStyle = '#a49a82';
+    for (let k = 0; k < 158; k += 10) { o.fillRect(b.x0 - 4 + k, b.y0 - 4, 1, 4); o.fillRect(b.x0 - 4 + k, b.y0 + 150, 1, 4); }
+    drawBlock(o, b);
+  });
+  for (let i = 0; i <= NX; i++) for (let j = 0; j <= NY; j++) for (const [a, c] of [[-23, -23], [23, 23]]) { disc(o, X(i) + a, Y(j) + c, 2.4, '#1d2224'); disc(o, X(i) + a, Y(j) + c, 1.2, GOLD); }
+}
+
+// ---------------------------------------------------------------- vehicles and people
+function drawCar(g, col) {
+  g.fillStyle = 'rgba(0,0,0,.35)'; rr(g, -13, -5, 28, 13, 4); g.fill();
+  g.fillStyle = col; rr(g, -14, -6.5, 28, 13, 4); g.fill();
+  g.fillStyle = '#f4f1e6'; g.fillRect(-14, -1, 28, 2);                      // whitewall stripe
+  g.fillStyle = '#bfe0e6'; g.fillRect(-3, -5, 9, 10);                        // windscreen and roof
+  g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(-14, -6.5, 6, 13);
+  g.fillStyle = col; g.beginPath(); g.moveTo(-14, -6.5); g.lineTo(-17, -7.5); g.lineTo(-10, -6.5); g.moveTo(-14, 6.5); g.lineTo(-17, 7.5); g.lineTo(-10, 6.5); g.fill();   // tail fins
+  g.fillStyle = '#ffeaa0'; g.fillRect(12, -5.5, 2.5, 3); g.fillRect(12, 2.5, 2.5, 3);
+  g.fillStyle = '#c33'; g.fillRect(-14.5, -5.5, 1.5, 3); g.fillRect(-14.5, 2.5, 1.5, 3);
+}
+function drawBus(g) {
+  g.fillStyle = 'rgba(0,0,0,.35)'; rr(g, -21, -6.5, 44, 15, 3); g.fill();
+  g.fillStyle = '#efe6c8'; rr(g, -22, -7.5, 44, 15, 4); g.fill(); g.fillStyle = '#c4482f'; g.fillRect(-22, -1, 44, 2);
+  g.fillStyle = '#3d5a6a'; for (let k = -18; k < 18; k += 7) { g.fillRect(k, -6, 5, 4); g.fillRect(k, 2, 5, 4); }
+  g.fillStyle = '#ffeaa0'; g.fillRect(21, -6, 2, 3); g.fillRect(21, 3, 2, 3);
+}
+// Little upright 1950s figures: suits and fedoras, full-skirted dresses, children in caps and pinafores
+function drawPerson(g, c, x, y, walking, prisoner) {
+  const kid = c.age < 15, L = c.look, s = kid ? .72 : 1, ph = walking ? Math.sin(c.stp * .45) : 0;
+  g.save(); g.translate(x, y); g.scale(s, s);
+  g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(0, 0, 3.6, 1.3, 0, 0, 7); g.fill();
+  const legCol = prisoner ? '#8a8f95' : c.male ? (kid ? L.skin : '#2b2a2a') : L.skin;
+  g.fillStyle = legCol; g.fillRect(-1.7 + ph * .7, -5.2, 1.3, 5 - Math.abs(ph) * .6); g.fillRect(.4 - ph * .7, -5.2, 1.3, 5 - Math.abs(ph) * .6);
+  g.fillStyle = c.male ? '#1a1a1a' : '#7a2a2a'; g.fillRect(-2 + ph * .7, -.6, 1.8, .8); g.fillRect(.2 - ph * .7, -.6, 1.8, .8);
+  if (prisoner) {
+    g.fillStyle = '#e9e4d2'; g.fillRect(-2.7, -12, 5.4, 7); g.fillStyle = '#3a3f45'; for (let k = -11; k < -5; k += 1.6) g.fillRect(-2.7, k, 5.4, .7);
+  } else if (c.male && !kid) {
+    g.fillStyle = L.suit; rr(g, -2.9, -12, 5.8, 7.2, 1.2); g.fill();
+    g.fillStyle = '#f4f1e6'; g.beginPath(); g.moveTo(-1, -12); g.lineTo(1, -12); g.lineTo(0, -9.6); g.fill();
+    g.fillStyle = '#9a2a2a'; g.fillRect(-.25, -11.4, .5, 2.2);
+  } else if (c.male) {
+    g.fillStyle = L.kid; g.fillRect(-2.4, -11, 4.8, 4.2); g.fillStyle = '#2f3d55'; g.fillRect(-2.4, -6.9, 4.8, 2.2);
+  } else {
+    g.fillStyle = kid ? L.kid : L.dress; g.beginPath(); g.moveTo(-2.1, -12); g.lineTo(2.1, -12); g.lineTo(3.9, -4.4); g.lineTo(-3.9, -4.4); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(-2.3, -8.8, 4.6, .8);
+  }
+  if (c.seat && !prisoner) disc(g, 1.4, -10.6, .9, pcol(c));               // party lapel pin
+  if (!c.male) disc(g, 0, -14.6, 2.7, L.hair);                               // hair behind the face
+  disc(g, 0, -14, 2.2, L.skin);
+  if (c.male && !kid) {
+    g.fillStyle = L.hat; g.beginPath(); g.ellipse(0, -15.6, 3.8, 1.1, 0, 0, 7); g.fill(); rr(g, -2.3, -18.4, 4.6, 2.9, 1); g.fill();
+    g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(-2.3, -16.3, 4.6, .7);
+  } else if (c.male) {
+    g.fillStyle = L.kid; g.beginPath(); g.arc(0, -15.3, 2.3, Math.PI, 0); g.fill(); g.fillRect(0, -15.5, 3.2, .8);
+  } else {
+    disc(g, -2.5, -13.4, 1.1, L.hair); disc(g, 2.5, -13.4, 1.1, L.hair);
+    if (kid) { g.fillStyle = L.dress; g.beginPath(); g.moveTo(1.2, -17); g.lineTo(3.2, -18); g.lineTo(3.2, -16); g.fill(); }
+    else if (L.pillbox) { g.fillStyle = L.dress; rr(g, -1.6, -18.2, 3.2, 1.6, .6); g.fill(); }
+  }
+  g.restore();
+}
+function drawBike(g, c, x, y) {
+  g.save(); g.translate(x, y);
+  g.strokeStyle = '#222'; g.lineWidth = 1;
+  g.beginPath(); g.arc(-3.6, -1.8, 1.8, 0, 7); g.stroke(); g.beginPath(); g.arc(3.6, -1.8, 1.8, 0, 7); g.stroke();
+  g.strokeStyle = '#2e7d32'; g.beginPath(); g.moveTo(-3.6, -1.8); g.lineTo(0, -4); g.lineTo(3.6, -1.8); g.stroke();
+  g.restore();
+  drawPerson(g, c, x, y - 2.5, false);
+}
+// where people gather around each block, so a crowd reads as people rather than a number
+function spots(b) {
+  if (b.spots) return b.spots;
+  const s = [];
+  for (let k = 10; k <= 140; k += 13) { s.push([b.x0 + k, b.y0 + 9]); s.push([b.x0 + k, b.y0 + 134]); }
+  for (let k = 22; k <= 122; k += 13) { s.push([b.x0 + 8, b.y0 + k]); s.push([b.x0 + 142, b.y0 + k]); }
+  return (b.spots = s);
+}
+
+/* =============================================================================
+   5  VIEW: the living map, panels, saving, music and start-up
+   ============================================================================= */
+let cvW = 0, cvH = 0, dpr = 1;
+const cam = { x: W / 2, y: H / 2, z: 1, f: false };
+const K = () => cvW / W * cam.z * dpr;
+function resize() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  cvW = Math.round(Math.min(cv.parentElement.clientWidth, Math.max(320, innerHeight * .82) * W / H));
+  cvH = Math.round(cvW * H / W);
+  cv.style.width = cvW + 'px'; cv.style.height = cvH + 'px'; cv.width = cvW * dpr; cv.height = cvH * dpr;
+}
+
+function draw() {
+  const g = ctx, h0 = G.T % 24, night = h0 >= 22 || h0 < 6, kidsOut = h0 >= 7 && h0 < 20;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#1c1f24'; g.fillRect(0, 0, cv.width, cv.height);
+  if (sel && cam.f) { cam.x += (sel.dx - cam.x) * .08; cam.y += (sel.dy - cam.y) * .08; }
+  const hw = W / (2 * cam.z), hh = H / (2 * cam.z); cam.x = cl(cam.x, hw, W - hw); cam.y = cl(cam.y, hh, H - hh);
+  const k = K(), world = () => g.setTransform(k, 0, 0, k, cv.width / 2 - cam.x * k, cv.height / 2 - cam.y * k);
+  world(); g.drawImage(OFF, 0, 0, W, H);
+
+  // bike lanes and the bus route show how well they are funded; the route goes dark when buses stop
+  g.strokeStyle = '#2fa44f'; g.globalAlpha = .3 + .6 * P.bike * inf(); g.lineWidth = 2 + 5 * P.bike;
+  for (let j = 0; j <= NY; j++) for (const s of [-12, 12]) { g.beginPath(); g.moveTo(0, Y(j) + s); g.lineTo(W, Y(j) + s); g.stroke(); }
+  for (let i = 0; i <= NX; i++) for (const s of [-12, 12]) { g.beginPath(); g.moveTo(X(i) + s, 0); g.lineTo(X(i) + s, H); g.stroke(); }
+  const busOn = isFinite(busWait());
+  g.globalAlpha = busOn ? .25 + .75 * P.transit : .08; g.strokeStyle = '#e8a090'; g.lineWidth = 2.5; g.setLineDash([6, 5]);
+  g.strokeRect(X(0) + 3, Y(0) + 3, X(NX) - X(0) - 6, Y(NY) - Y(0) - 6); g.setLineDash([]);
+  g.font = '700 6px sans-serif'; g.textAlign = 'center';
+  for (let i = 0; i <= NX; i++) for (let j = 0; j <= NY; j++) if (i % NX === 0 || j % NY === 0) {
+    g.fillStyle = busOn ? '#c4482f' : '#6d737c'; g.beginPath(); g.arc(X(i) + 15, Y(j) - 15, 5, 0, 7); g.fill(); g.fillStyle = '#fff'; g.fillText('BUS', X(i) + 15, Y(j) - 13);
+  }
+  g.globalAlpha = 1;
+  if (Math.random() < .35 && !G.paused) for (const s of STACKS) smoke.push({ x: s[0], y: s[1], r: 3, a: .5 });
+  for (const p of smoke) { p.x += .25; p.y -= .12; p.r += .05; p.a -= .004; disc(g, p.x, p.y, p.r, `rgba(210,210,215,${Math.max(0, p.a)})`); }
+  smoke = smoke.filter(p => p.a > 0);
+  { const fb = blocks.find(b => b.sty === 'fountain'), ph = (performance.now() / 1400) % 1;
+    if (fb) { g.strokeStyle = `rgba(255,255,255,${.5 * (1 - ph)})`; g.lineWidth = 1; g.beginPath(); g.arc(fb.x0 + 75, fb.y0 + 75, 6 + 16 * ph, 0, 7); g.stroke(); } }
+
+  // gather everyone who should be visible, then draw vehicles first and people sorted by depth
+  const people = [], crowd = {};
+  for (const c of C) {
+    c.dx = X(c.gx) + 22; c.dy = Y(c.gy) + 22;
+    if (c.st === 'do' || c.age < 15) {
+      const b = c.blk;
+      if (c.goal === 'park') { c.px = cl(c.px + gs() * .4, b.x0 + 10, b.x0 + 140); c.py = cl(c.py + gs() * .4, b.y0 + 18, b.y0 + 132); c.dx = c.px; c.dy = c.py; people.push([c, c.px, c.py, false]); continue; }
+      if ((c.goal === 'home' || c.age < 15) && (night || c.age < 15 && !kidsOut)) continue;   // indoors for the night
+      crowd[b.id] = (crowd[b.id] || 0) + 1;
+      if (crowd[b.id] > 18) continue;
+      const sp = spots(b), p = sp[(c.id * 7 + crowd[b.id] * 3) % sp.length];
+      c.dx = p[0]; c.dy = p[1]; people.push([c, p[0], p[1], false, c.goal === 'jail' && c.jail > 0]);
+      continue;
+    }
+    const m = c.wait > 0 ? 'stand' : c.mode, off = m === 'walk' || m === 'stand' ? 17 : m === 'bike' ? 12 : 5;
+    const x = c.x - c.hy * off, y = c.y + c.hx * off; c.dx = x; c.dy = y;
+    if (m === 'car' || m === 'bus') { g.save(); g.translate(x, y); g.rotate(Math.atan2(c.hy, c.hx)); m === 'car' ? drawCar(g, CARC[c.id % CARC.length]) : drawBus(g); g.restore(); }
+    else people.push([c, x, y, m === 'walk', false, m === 'bike']);
+  }
+  people.sort((a, b) => a[2] - b[2]);
+  for (const [c, x, y, walking, prisoner, bike] of people) {
+    if (c === sel) { g.strokeStyle = '#ffd23f'; g.lineWidth = 1.5; g.beginPath(); g.ellipse(x, y, 6, 2.4, 0, 0, 7); g.stroke(); }
+    bike ? drawBike(g, c, x, y) : drawPerson(g, c, x, y, walking, prisoner);
+  }
+  g.font = '600 9px "Josefin Sans",sans-serif'; g.textAlign = 'center';
+  for (const b of blocks) if (crowd[b.id] > 18) { g.fillStyle = 'rgba(10,20,22,.85)'; rr(g, b.x0 + 112, b.y0 + 120, 30, 13, 6); g.fill(); g.fillStyle = '#e0b64a'; g.fillText('+' + (crowd[b.id] - 18), b.x0 + 127, b.y0 + 129.5); }
+
+  // Town Hall: coalition pennants and session or polling notices
+  const hb = hallB();
+  coalition.forEach((p, i) => { const fx0 = hb.x0 + 16 + i * 14; g.fillStyle = '#e9e4d2'; g.fillRect(fx0, hb.y0 + 4, 1.5, 16); g.fillStyle = p.col; g.fillRect(fx0 + 1.5, hb.y0 + 4, 9, 6); });
+  const tag = G.day > 0 && G.day % 18 === 0 && h0 >= 7 && h0 < 19 ? 'POLLS OPEN' : G.day > 0 && G.day % 6 === 0 && h0 >= 8 && h0 < 13 ? 'COUNCIL IN SESSION' : '';
+  if (tag) { g.fillStyle = 'rgba(18,86,92,.94)'; rr(g, hb.x0 + 25, hb.y0 - 15, 100, 15, 7); g.fill(); g.strokeStyle = GOLD; g.lineWidth = 1; g.stroke(); g.fillStyle = '#f2e8cf'; g.font = '600 8px "Josefin Sans",sans-serif'; g.fillText(tag, hb.x0 + 75, hb.y0 - 4.5); }
+  for (const f of fxs) {
+    f.y -= .22; f.a -= .005; if (f.a <= 0) continue;
+    g.globalAlpha = Math.min(1, f.a * 1.6); g.font = '700 10px "Josefin Sans",sans-serif'; g.lineWidth = 3; g.strokeStyle = 'rgba(10,16,20,.85)';
+    g.strokeText(f.t, f.x, f.y); g.fillStyle = f.col; g.fillText(f.t, f.x, f.y);
+  }
+  g.globalAlpha = 1; fxs = fxs.filter(f => f.a > 0);
+
+  // light: night, dusk, lamps, lit windows, headlights, neon
+  const sunv = Math.max(0, Math.sin((h0 - 6) / 12 * Math.PI)), nt = 1 - sunv;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = `rgba(8,16,44,${.62 * nt})`; g.fillRect(0, 0, cv.width, cv.height);
+  const dusk = Math.max(0, 1 - Math.abs(h0 - 6.5) / 1.6) + Math.max(0, 1 - Math.abs(h0 - 18.5) / 1.6);
+  if (dusk > 0) { g.fillStyle = `rgba(255,138,64,${.13 * dusk})`; g.fillRect(0, 0, cv.width, cv.height); }
+  const vg = g.createRadialGradient(cv.width / 2, cv.height / 2, Math.min(cv.width, cv.height) * .35, cv.width / 2, cv.height / 2, Math.max(cv.width, cv.height) * .75);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.35)'); g.fillStyle = vg; g.fillRect(0, 0, cv.width, cv.height);
+  if (nt > .3) {
+    world(); g.globalCompositeOperation = 'lighter'; const a = .55 * nt;
+    g.fillStyle = `rgba(255,200,110,${a * .9})`; for (const w2 of WINS) g.fillRect(w2[0], w2[1], w2[2], w2[3]);
+    for (let i = 0; i <= NX; i++) for (let j = 0; j <= NY; j++) {
+      const lg = g.createRadialGradient(X(i), Y(j), 0, X(i), Y(j), 44); lg.addColorStop(0, `rgba(255,214,120,${a * .55})`); lg.addColorStop(1, 'rgba(255,214,120,0)'); g.fillStyle = lg; g.fillRect(X(i) - 44, Y(j) - 44, 88, 88);
+    }
+    for (const c of C) if (c.st === 'move' && c.wait <= 0 && (c.mode === 'car' || c.mode === 'bus')) {
+      const x = c.x - c.hy * 5 + c.hx * 22, y = c.y + c.hx * 5 + c.hy * 22, hg = g.createRadialGradient(x, y, 0, x, y, 24);
+      hg.addColorStop(0, `rgba(255,240,180,${a})`); hg.addColorStop(1, 'rgba(255,240,180,0)'); g.fillStyle = hg; g.fillRect(x - 24, y - 24, 48, 48);
+    }
+    g.globalCompositeOperation = 'source-over'; g.font = '600 9px "Josefin Sans",sans-serif'; g.textAlign = 'center';
+    for (const n of NEON) { g.shadowColor = n[3]; g.shadowBlur = 10 * nt * (Math.random() < .02 ? .2 : 1); g.fillStyle = n[3]; g.fillText(n[2], n[0], n[1] + 1); }
+    g.shadowBlur = 0;
+  }
+
+  // the clock plaque, shutdown notice and title card
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = 'rgba(13,29,32,.85)'; rr(g, 8, 8, 206, 26, 4); g.fill(); g.strokeStyle = GOLD; g.lineWidth = 1; g.stroke();
+  g.fillStyle = '#e0b64a'; g.font = '15px "Poiret One",serif'; g.textAlign = 'left'; g.fillText(`Day ${G.day}   ${hr()}`, 16, 26);
+  g.fillStyle = G.tre > 0 ? '#9fe0a0' : '#ff8a7a'; g.textAlign = 'right'; g.fillText(`$${Math.round(G.tre)}`, 206, 26); g.textAlign = 'left';
+  if (G.broke) { g.fillStyle = 'rgba(160,40,30,.92)'; rr(g, 222, 8, 250, 26, 4); g.fill(); g.fillStyle = '#fff'; g.font = '600 12px "Josefin Sans",sans-serif'; g.fillText('TREASURY EMPTY: SERVICES SUSPENDED', 230, 25); }
+  if (G.intro > 0) {
+    const a = Math.min(1, G.intro * 1.6), w = cv.width / dpr, h = cv.height / dpr;
+    g.globalAlpha = a; g.fillStyle = 'rgba(13,29,32,.92)'; g.fillRect(0, 0, w, h); g.strokeStyle = GOLD; g.lineWidth = 2;
+    g.strokeRect(w * .18, h * .32, w * .64, h * .36); g.strokeRect(w * .18 + 6, h * .32 + 6, w * .64 - 12, h * .36 - 12);
+    g.textAlign = 'center'; g.fillStyle = '#e0b64a'; g.font = `${Math.round(w * .07)}px "Poiret One",serif`; g.fillText('HOLLOWBROOK', w / 2, h * .5);
+    g.font = `${Math.round(w * .022)}px "Josefin Sans",sans-serif`; g.fillStyle = '#f2e8cf'; g.fillText('A town that runs itself  ·  1952', w / 2, h * .5 + w * .045);
+    g.globalAlpha = 1;
+  }
+}
+
+// ---------------------------------------------------------------- panels
+const gr = v => v >= 90 ? 'A' : v >= 80 ? 'B' : v >= 70 ? 'C' : v >= 60 ? 'D' : 'F';
+const trend = k => { const h = hist[k] || []; return h.length > 10 ? h[h.length - 1] - h[h.length - 11] : 0; };
+function paintScore() {
+  if (SC.Overall == null) return;
+  const rows = Object.entries(SC).filter(e => e[0] !== 'Overall').sort((a, b) => b[1] - a[1]);
+  $('score').innerHTML = `<div class="ov"><b>${gr(SC.Overall)}</b><span>Town overall: ${Math.round(SC.Overall)} out of 100</span></div>` +
+    rows.map((r, i) => { const t = trend(r[0]); return `<div class="sr"><i>${i + 1}</i><span>${r[0]}</span><div class="track"><u style="width:${r[1]}%"></u></div><b>${Math.round(r[1])}</b><em>${gr(r[1])}</em><s>${t > 1 ? '▲' : t < -1 ? '▼' : '–'}</s></div>`; }).join('');
+}
+function paintPulse() {
+  const pc = $('pulse'), g = pc.getContext('2d'), cs = getComputedStyle(document.documentElement);
+  const ink = cs.getPropertyValue('--ink').trim() || '#1a2a2c', mute = cs.getPropertyValue('--mute').trim() || '#5e6a66', line = cs.getPropertyValue('--line').trim() || '#cdbf98';
+  g.clearRect(0, 0, pc.width, pc.height);
+  const last = pulse[pulse.length - 1], maxW = Math.max(60, ...pulse.map(p => p.wealth));
+  const panels = [['Happiness', 'mood', 100, '#d4a63a', v => Math.round(v) + '%'], ['Median wealth', 'wealth', maxW, '#3f8a4a', v => '$' + Math.round(v)],
+                  ['Health', 'health', 100, '#2a9aa3', v => Math.round(v) + '%'], ['Trust in government', 'trust', 100, '#c4482f', v => Math.round(v) + '%']];
+  panels.forEach(([title, key, max, col, f], i) => {
+    const x0 = (i % 2) * 340 + 16, y0 = (i >> 1) * 160 + 12, w = 308, h = 92;
+    g.fillStyle = mute; g.font = '600 15px "Josefin Sans",sans-serif'; g.textAlign = 'left'; g.fillText(title, x0, y0 + 14);
+    g.fillStyle = ink; g.font = '30px "Poiret One",serif'; g.textAlign = 'right'; g.fillText(last ? f(last[key]) : '–', x0 + w, y0 + 26);
+    g.strokeStyle = line; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, y0 + 40 + h); g.lineTo(x0 + w, y0 + 40 + h); g.stroke();
+    if (pulse.length > 1) {
+      g.strokeStyle = col; g.lineWidth = 3; g.beginPath();
+      pulse.forEach((p, k) => { const px = x0 + k / 59 * w, py = y0 + 40 + h - cl(p[key] / max, 0, 1) * h; k ? g.lineTo(px, py) : g.moveTo(px, py); });
+      g.stroke();
+    }
+  });
+}
+function paintCouncil() {
+  const sc = p => council.filter(c => c.party === p.id && byId.has(c.id)).length, h0 = G.T % 24;
+  $('cstat').innerHTML = `Twelve members, elected every 18 days by proportional vote. The council sits every 6 days at noon and needs 7 votes to pass a bill. Next session ${G.day > 0 && G.day % 6 === 0 && h0 < 12 ? 'today at noon' : `in ${6 - G.day % 6} days`}, next election ${G.day > 0 && G.day % 18 === 0 && h0 < 19 ? 'today' : `in ${18 - G.day % 18} days`}.${coalition.length ? ` Governing coalition: <b>${coalition.map(p => p.name).join(' with the ')}</b>.` : ''}`;
+  $('seats').innerHTML = council.filter(c => byId.has(c.id)).map(c => `<div class="seat" style="--pc:${pcol(c)}"><b>${nm(c)}</b>${pname(c)}</div>`).join('');
+  $('parties').innerHTML = parties.slice().sort((a, b) => sc(b) - sc(a) || (b.n || 0) - (a.n || 0)).map(p =>
+    `<li><span style="color:${p.col}">●</span> <b>${p.name}</b>: ${sc(p)} ${sc(p) === 1 ? 'seat' : 'seats'}, ${p.n || 0} members, ${coalition.includes(p) ? 'in government' : sc(p) ? 'in opposition' : 'outside the council'}. Founded ${p.born ? 'on day ' + p.born : 'with the town'}. Stands for ${pdesc(p)}.${p.agenda && p.agenda[0] ? ` Pushing to ${desc(p.agenda[0])}.` : ''}</li>`).join('') || '<li>No parties at the moment.</li>';
+}
+function paintDocket() {
+  const now = docket.map(b => `<li>Petition to ${desc(b)}. Started by ${nm(b.spon)}, who ${b.r}${b.co ? `, with ${b.co} early signers` : ''}.${b.sup != null ? ` Support at last count: ${pct(b.sup)}.` : ''}</li>`).join('') || '<li>No petitions circulating.</li>';
+  $('docket').innerHTML = now + (petHist.length ? '<li class="hd">Earlier petitions</li>' + petHist.map(p => `<li class="old">Day ${p.day}: ${p.t}</li>`).join('') : '');
+}
+function paintBook() {
+  const now = laws.map(l => `<li><b>${lname(l)}</b>. ${l.by ? `Passed on day ${l.day}, ${l.tally}. Sponsor: ${l.by}.` : 'Founding law.'}</li>`).join('') || '<li>The statute book is empty.</li>';
+  $('book').innerHTML = now + (lawHist.length ? '<li class="hd">Changes over time</li>' + lawHist.map(h => `<li class="old">Day ${h.day}: ${h.t}</li>`).join('') : '');
+}
+function ledger() {
+  const pf = fill('police'), df = fill('depot'), wt = busWait();
+  $('ledger').innerHTML = `<b>Treasury ${Math.round(G.tre)}</b>, ${G.lastDelta >= 0 ? '+' : ''}${Math.round(G.lastDelta)} yesterday. ` +
+    (G.broke ? '<span style="color:var(--coral)">Services suspended: no buses, police, relief or subsidies until the books recover.</span>'
+      : `Police ${pct(pf)} staffed, catching roughly ${pct(cl(policePower() * .6 + .03, 0, .9))} of thieves. ${isFinite(wt) ? `Buses every ${Math.round(wt * 60)} minutes, ${pct(df)} of driver posts filled.` : 'No buses: the depot has no drivers.'}`);
+}
+function setLaw(k, v) { P[k] = v; const s = k === 'pen' ? v : Math.round(v * 100); $(k).value = s; $('o_' + k).textContent = k === 'pen' ? s + ' days' : s + '%'; }
+function paint() {
+  const n = C.length, mv = { walk: 0, bike: 0, bus: 0, car: 0 }, A = adults();
+  C.forEach(c => { if (c.st === 'move' && c.wait <= 0 && c.age >= 15) mv[c.mode]++; });
+  $('s_t').textContent = `Day ${G.day}, ${hr()}`; $('s_p').textContent = `${n} (${G.births} born, ${G.deaths} died)`; $('s_r').textContent = Math.round(G.tre);
+  $('s_e').textContent = A.length ? pct(A.filter(c => c.job).length / A.length) : '–'; $('s_j').textContent = C.filter(c => c.jail > 0).length;
+  $('s_m').textContent = `${mv.walk} / ${mv.bike} / ${mv.bus} / ${mv.car}`;
+  const c = sel;
+  if (!c) { $('insp').innerHTML = 'Click anyone on the map to follow them and see the reasons behind every move.'; return; }
+  const ob = owned(c), habits = SK.filter(s => c.hab[s] > .3).map(s => `${c.hab[s] > .7 ? 'heavy' : 'regular'} ${SUBS[s].n.toLowerCase()}`);
+  const tags = [c.whim ? `Whim: ${WHIMS[c.whim.k].n}` : '', c.want ? `Dream: ${WANTS[c.want.k].n}` : '', c.anger > .3 ? `Anger ${pct(c.anger)}` : '', ...habits.map(h => `Habit: ${h}`)].filter(Boolean);
+  $('insp').innerHTML = `<b>${nm(c)}</b>, ${c.age < 15 ? 'a child' : `age ${c.age} days`}. ${c.age < 15 ? '' : c.job ? `${cap(JOBS[c.job.t].n)} at ${JOBS[c.job.t].place}` : 'Out of work'}${ob ? `, owner of ${VEN[ob.t].place} (took in $${Math.round(biz[ob.id].last)} yesterday)` : ''}.<br>
+    Wealth ${c.w | 0}, earning ${c.inc.toFixed(1)} and spending ${c.exp.toFixed(1)} a day. Lives in ${c.home.sty} housing${c.loan ? `, owes ${c.loan} on the car` : ''}${c.pass > 0 ? ', holds a bus pass' : ''}. ${fa(c).length} friends.<br>
+    Health ${Math.round(c.hp * 10)}%, mood ${c.mood | 0}, energy ${c.en | 0}, hunger ${c.hu | 0}${c.car ? `, fuel ${c.fuel | 0}%` : ''}.<br>
+    ${c.seat ? `<b style="color:${pcol(c)}">Council member, ${pname(c)}</b>. Weighs voters’ interests ${pct(c.rep)}, party loyalty ${pct(c.loy)}.` : c.party ? `Member of the ${pname(c)}.` : 'Belongs to no party.'} Trust in the government ${pct(govTrust(c))}.<br>
+    <span class="sub">Honesty ${pct(c.h)}, risk ${pct(c.r)}, diligence ${pct(c.dil)}, thrift ${pct(c.thr)}, sociability ${pct(c.soc)}, civic ${pct(c.civ)}, status-conscious ${pct(c.vain)}, health-conscious ${pct(c.hc)}.</span><br>
+    ${tags.map(t => `<span class="tag">${t}</span>`).join('')}
+    <ul>${c.hist.map(h => `<li>${h}</li>`).join('')}</ul>`;
+}
+function paintAll() { paintDocket(); paintBook(); paintCouncil(); paintScore(); paintPulse(); ledger(); paint(); }
+
+// ---------------------------------------------------------------- saving and loading
+const SAVE_KEY = 'hollowbrook-1952-save';
+function snapshot() {
+  const pb = b => ({ ...b, spon: b.spon.id, law: b.law ? b.law.id : undefined });
+  return { v: 5, saved: Date.now(), G: { ...G }, P: { ...P }, M, SC, hist, pulse, laws, lawHist, petHist, gaz: gaz.slice(0, 250), biz, usedNames: [...usedNames],
+    parties: parties.map(p => ({ id: p.id, name: p.name, col: p.col, v: p.v, born: p.born, n: p.n })), council: council.map(c => c.id), coalition: coalition.map(p => p.id),
+    docket: docket.map(pb), C: C.map(c => ({ ...c, home: c.home.id, blk: c.blk.id, tgt: c.tgt.id, job: c.job ? c.job.id : null, plan: null, hist: c.hist.slice(0, 6) })) };
+}
+function restore(s) {
+  Object.assign(G, s.G, { paused: false, intro: .7 }); Object.assign(P, s.P); Object.assign(M, s.M);
+  SC = s.SC || {}; hist = s.hist || {}; pulse = s.pulse || []; laws = s.laws || []; lawHist = s.lawHist || []; petHist = s.petHist || []; gaz = s.gaz || []; biz = s.biz || {};
+  usedNames.clear(); (s.usedNames || []).forEach(n => usedNames.add(n));
+  C = s.C.map(c => ({ ...c, home: blocks[c.home], blk: blocks[c.blk], tgt: blocks[c.tgt], job: c.job != null ? blocks[c.job] : null }));
+  byId = new Map(C.map(c => [c.id, c]));
+  parties = s.parties.map(p => ({ ...p, agenda: [] }));
+  council = s.council.map(id => byId.get(id)).filter(Boolean);
+  coalition = s.coalition.map(id => party(id)).filter(Boolean);
+  const ghost = id => byId.get(id) || { id, name: 'the late', sur: 'citizen', civ: .5, party: 0 };
+  docket = (s.docket || []).map(b => ({ ...b, spon: ghost(b.spon), law: b.law != null ? laws.find(l => l.id === b.law) : undefined })).filter(b => b.kind === 'set' || b.kind === 'enact' || b.law);
+  today = { crimes: 0, sales: 0, pay: 0, vis: {}, trips: { walk: 0, bike: 0, bus: 0, car: 0 }, subs: {} };
+  sel = null; cam.f = false; smoke = []; fxs = []; staffMemo.t = -1; fxMemo.d = -1;
+  DEF.forEach(d => setLaw(d[0], P[d[0]]));
+  $('sp').value = String(G.speed); $('pp').textContent = 'Pause';
+  $('log').innerHTML = gaz.map(e => `<li class="${e[1]}">${e[0]}</li>`).join('');
+  paintAll();
+}
+function status(t) { $('mst').textContent = t; }
+function saveGame(manual) {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot()));
+    $('ld').disabled = false; $('ld').textContent = `Load save (day ${G.day})`;
+    if (manual) status(`Saved on day ${G.day} at ${hr()}.`);
+  } catch (e) { if (manual) status('This browser would not let the game save.'); }
+}
+const autosave = () => saveGame(false);
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) { status('No saved town yet.'); return; }
+    restore(JSON.parse(raw)); status(`Loaded the town from day ${G.day}.`);
+  } catch (e) { status('The saved town could not be loaded.'); }
+}
+function checkSave() {
+  try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { const d = JSON.parse(raw).G.day; $('ld').disabled = false; $('ld').textContent = `Load save (day ${d})`; status(`A saved town from day ${d} is waiting. Press Load save to continue it.`); } } catch (e) { /* storage unavailable */ }
+}
+
+// ---------------------------------------------------------------- music: slow, swanky jazz from a Moroccan bar
+const MU = { ac: null, out: null, bus: null, noise: null, on: false, t: 0, step: 0, bar: 0, timer: 0, lead: 69, unlock: null };
+const mf = n => 440 * 2 ** ((n - 69) / 12);
+// Caravan-style changes over D Phrygian dominant (the Hijaz scale): D7b9 vamp, G minor, then A7 back home
+const BARS = [{ r: 38, ch: [50, 54, 57, 60] }, { r: 38, ch: [50, 54, 57, 63] }, { r: 38, ch: [50, 54, 57, 60] }, { r: 38, ch: [50, 54, 57, 63] },
+              { r: 43, ch: [55, 58, 62, 65] }, { r: 43, ch: [55, 58, 62, 64] }, { r: 45, ch: [57, 61, 64, 67] }, { r: 45, ch: [57, 61, 64, 70] }];
+const HIJAZ = [2, 3, 6, 7, 9, 10, 0];
+function mNote(type, n, t, d, v, cut) {
+  const a = MU.ac, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(mf(n), t);
+  let node = o;
+  if (cut) { const f = a.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(cut, t); f.frequency.exponentialRampToValueAtTime(Math.max(180, cut * .3), t + d); o.connect(f); node = f; }
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .005); g.gain.exponentialRampToValueAtTime(.0008, t + d);
+  node.connect(g); g.connect(MU.bus); o.start(t); o.stop(t + d + .05);
+  return o;
+}
+function mHit(t, freq, q, d, v) {
+  const a = MU.ac, s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+  s.buffer = MU.noise; f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = q;
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0008, t + d); s.connect(f); f.connect(g); g.connect(MU.bus); s.start(t); s.stop(t + d + .02);
+}
+function doum(t, v) { const o = mNote('sine', 42, t, .32, v); o.frequency.exponentialRampToValueAtTime(mf(30), t + .2); }
+function oudNote(n, t, d, v) { mNote('sawtooth', n, t, d, v, 2200); mNote('square', n + 12, t, d * .5, v * .12, 1600); }
+function pickLead(onBeat, chord) {
+  const pool = [];
+  for (let n = 62; n <= 81; n++) if (onBeat ? chord.some(c => (n - c) % 12 === 0) : HIJAZ.includes(n % 12)) pool.push(n);
+  const tgt = cl(MU.lead + Math.round(gs() * 2.6), 64, 79);
+  MU.lead = pool.reduce((b, n) => Math.abs(n - tgt) < Math.abs(b - tgt) ? n : b, pool[0]);
+  return MU.lead;
+}
+function mSched() {
+  const a = MU.ac;
+  while (MU.t < a.currentTime + .3) {
+    const h0 = G.T % 24, late = h0 >= 20 || h0 < 6, b = 60 / (late ? 68 : 78), k = MU.step % 8, bar = BARS[MU.bar % 8], v = late ? .8 : 1;
+    const t = MU.t + (k % 2 ? b * .14 : 0);                                  // lazy swing
+    if (k === 0 || k === 4) doum(t, .38 * v);                                // maqsum: doum tek . tek doum . tek .
+    if (k === 1 || k === 3 || k === 6) mHit(t, 3200, 1.6, .07, .16 * v);
+    if (k === 7 && Math.random() < .35) mHit(t, 3600, 2, .05, .07 * v);
+    if ((k === 2 || k === 6) && Math.random() < .22) { mNote('square', 98, t, .5, .012 * v, 6000); mNote('square', 101, t, .45, .01 * v, 6000); }   // finger cymbals
+    if (k === 0) { mNote('triangle', bar.r, t, b * 1.6, .34 * v); mNote('square', bar.r + 12, t, b * 3.8, .016 * v, 600); mNote('square', bar.r + 19, t, b * 3.8, .012 * v, 600); }
+    if (k === 3) mNote('triangle', bar.r + 7, t, b * .9, .26 * v);
+    if (k === 4) mNote('triangle', bar.r + 12, t, b * .9, .24 * v);
+    if (k === 7 && Math.random() < .6) mNote('triangle', bar.r + 10, t, b * .45, .2 * v);
+    if (k === 2 || k === 5 && Math.random() < .5) bar.ch.forEach(n => mNote('square', n, t, b * .35, .009 * v, 1300));
+    const rest = MU.bar % 2 === 1 && k >= 5;
+    if (!rest && Math.random() < (late ? .34 : .46)) {
+      const n = pickLead(k % 2 === 0, bar.ch), long = Math.random() < .25, d = b * (long ? 1.4 : .55);
+      if (Math.random() < .3) oudNote(n + (HIJAZ.includes((n + 1) % 12) ? 1 : 2), t - .05, .07, .045 * v);   // grace note
+      if (long && Math.random() < .4) for (let r = 0; r < 4; r++) oudNote(n, t + r * b * .12, b * .14, .05 * v);  // qanun-style tremolo
+      else oudNote(n, t, d, .07 * v);
+    }
+    MU.t += b / 2; MU.step++; if (MU.step % 8 === 0) MU.bar++;
+  }
+}
+function wavURI() {
+  const n = 4000, bytes = new Uint8Array(44 + n), dv = new DataView(bytes.buffer), w = (o, s) => { for (let i = 0; i < s.length; i++) bytes[o + i] = s.charCodeAt(i); };
+  w(0, 'RIFF'); dv.setUint32(4, 36 + n, true); w(8, 'WAVE'); w(12, 'fmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+  dv.setUint32(24, 8000, true); dv.setUint32(28, 8000, true); dv.setUint16(32, 1, true); dv.setUint16(34, 8, true); w(36, 'data'); dv.setUint32(40, n, true); bytes.fill(128, 44);
+  let s = ''; bytes.forEach(x => s += String.fromCharCode(x)); return 'data:audio/wav;base64,' + btoa(s);
+}
+function music() {
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* not supported */ }
+  if (!MU.unlock) { try { MU.unlock = new Audio(wavURI()); MU.unlock.loop = true; MU.unlock.setAttribute('playsinline', ''); } catch (e) { /* ignore */ } }
+  if (MU.unlock) { try { const p = MU.unlock.play(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* ignore */ } }
+  if (!MU.ac) {
+    const a = MU.ac = new (window.AudioContext || window.webkitAudioContext)();
+    MU.out = a.createGain(); MU.out.gain.value = 0;
+    const warm = a.createBiquadFilter(); warm.type = 'lowpass'; warm.frequency.value = 5200;
+    const comp = a.createDynamicsCompressor(); MU.out.connect(warm); warm.connect(comp); comp.connect(a.destination);
+    MU.bus = a.createGain(); MU.bus.connect(MU.out);
+    const dl = a.createDelay(1), fb = a.createGain(), wet = a.createGain(); dl.delayTime.value = .38; fb.gain.value = .3; wet.gain.value = .22;
+    MU.bus.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(MU.out);      // a little room echo
+    MU.noise = a.createBuffer(1, Math.floor(a.sampleRate * .2), a.sampleRate); const d = MU.noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const a = MU.ac; { const s = a.createBufferSource(); s.buffer = a.createBuffer(1, 1, 22050); s.connect(a.destination); s.start(0); }
+  MU.on = !MU.on; $('mu').textContent = MU.on ? '♪ Pause jazz' : '♪ Play jazz'; $('mu').setAttribute('aria-pressed', MU.on);
+  const now = a.currentTime; MU.out.gain.cancelScheduledValues(now); MU.out.gain.setValueAtTime(MU.out.gain.value, now);
+  if (MU.on) {
+    const go = () => { const t = a.currentTime; MU.t = t + .1; MU.step = 0; MU.out.gain.cancelScheduledValues(t); MU.out.gain.setValueAtTime(0, t); MU.out.gain.linearRampToValueAtTime(.8, t + .8); clearInterval(MU.timer); MU.timer = setInterval(mSched, 30); mSched(); };
+    a.state === 'running' ? go() : a.resume().then(go, go);
+    status('Starting the band…');
+    setTimeout(() => { if (MU.on) status(a.state === 'running' ? 'Now playing at the Rusty Anchor.' : 'Your browser is holding the sound back. Check the volume and silent switch, then tap again.'); }, 900);
+  } else { MU.out.gain.linearRampToValueAtTime(0, now + .4); clearInterval(MU.timer); if (MU.unlock) MU.unlock.pause(); status(''); }
+}
+
+// ---------------------------------------------------------------- start-up and controls
+function newTown() {
+  C = []; byId = new Map(); docket = []; parties = []; council = []; coalition = []; gaz = []; petHist = []; lawHist = []; biz = {}; pulse = []; hist = {}; SC = {};
+  Object.assign(G, { T: 7, day: 0, tre: 400, births: 0, deaths: 0, nid: 0, bid: 0, lid: 0, pid: 0, broke: false, lastDelta: 0, treY: 400, sessDay: -1, elecDay: -1, paused: false, intro: 1 });
+  Object.assign(M, { tripH: 1.2, cost: 1, crime: 0, turn: .4, act: 2, sales: 2, pay: 400, vis: {}, trips: { walk: 2, bike: 2, bus: 2, car: 2 }, subs: {}, tj: 0 });
+  today = { crimes: 0, sales: 0, pay: 0, vis: {}, trips: { walk: 0, bike: 0, bus: 0, car: 0 }, subs: {} };
+  sel = null; cam.f = false; smoke = []; fxs = []; staffMemo.t = -1; fxMemo.d = -1; $('pp').textContent = 'Pause'; $('log').innerHTML = '';
+  laws = STARTERS.filter((s, k) => $('st' + k).checked).map(s => ({ ...s[0], id: ++G.lid }));
+  for (let i = 0; i < 100; i++) makeCitizen();
+  setupBusinesses();
+  for (const c of adults().sort(() => Math.random() - .5)) if (!c.job && Math.random() < .8) { const j = findJob(c); if (j) { c.job = j; staffAdd(j, 1); } }
+  glog('Hollowbrook opens for business with 100 citizens.', 'gov');
+  seedParties(); election(true); calc(); recordPulse(); paintAll();
+}
+
+let lastFrame = 0, frames = 0;
+function frame(t) {
+  const dt = Math.min((t - lastFrame) / 1000, .1); lastFrame = t;
+  if (G.intro > 0) G.intro -= dt * .28;
+  if (!G.paused) step(dt * G.speed);
+  draw();
+  if (++frames % 8 === 0) paint();
+  requestAnimationFrame(frame);
+}
+
+$('laws').innerHTML = DEF.map(d => `<label>${d[1]} <output id="o_${d[0]}">${d[2]}${d[0] === 'pen' ? ' days' : '%'}</output><input id="${d[0]}" type="range" min="${d[3]}" max="${d[4]}" value="${d[2]}"></label>`).join('');
+$('starters').innerHTML = STARTERS.map((s, k) => `<label class="st"><input type="checkbox" id="st${k}" ${s[1] ? 'checked' : ''}> ${lname(s[0])}</label>`).join('');
+DEF.forEach(d => $(d[0]).oninput = e => { const v = +e.target.value; P[d[0]] = d[0] === 'pen' ? v : v / 100; $('o_' + d[0]).textContent = d[0] === 'pen' ? v + ' days' : v + '%'; ledger(); });
+
+let drag = null;
+cv.onpointerdown = e => { drag = { x: e.clientX, y: e.clientY, m: 0 }; cv.setPointerCapture(e.pointerId); };
+cv.onpointermove = e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.m += Math.abs(dx) + Math.abs(dy);
+  if (drag.m > 6) { cam.f = false; const s = cvW / W * cam.z; cam.x -= dx / s; cam.y -= dy / s; }
+  drag.x = e.clientX; drag.y = e.clientY;
+};
+cv.onpointerup = e => {
+  if (drag && drag.m < 7) {
+    const r = cv.getBoundingClientRect(), s = cvW / W * cam.z, wx = cam.x + (e.clientX - r.left - cvW / 2) / s, wy = cam.y + (e.clientY - r.top - cvH / 2) / s;
+    let best = null, bd = (18 / s) ** 2;
+    for (const c of C) { const d = (c.dx - wx) ** 2 + (c.dy - 7 - wy) ** 2; if (d < bd) { bd = d; best = c; } }
+    sel = best; if (best) { cam.f = true; cam.z = Math.max(cam.z, 2.6); paint(); } else cam.f = false;
+  }
+  drag = null;
+};
+cv.addEventListener('wheel', e => { e.preventDefault(); cam.z = cl(cam.z * (1 - e.deltaY * .001), 1, 6); }, { passive: false });
+$('pp').onclick = () => { if (!C.length) return; G.paused = !G.paused; $('pp').textContent = G.paused ? 'Resume' : 'Pause'; };
+$('sp').onchange = e => G.speed = +e.target.value;
+$('ov').onclick = () => { sel = null; cam.f = false; cam.z = 1; cam.x = W / 2; cam.y = H / 2; };
+$('sv').onclick = () => saveGame(true);
+$('ld').onclick = loadGame;
+$('rs').onclick = newTown;
+$('mu').onclick = music;
+addEventListener('resize', resize);
+
+buildStatic();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(buildStatic);
+resize(); newTown(); checkSave(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
